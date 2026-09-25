@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biblioteca de Animações</title>
+<style>
+  :root{--bg:#07131f;--panel:#0e1f2e;--line:#24384a;--ink:#eaf2f6;--mut:#8fb0c4;--cy:#22d3ee;--am:#F5A623;--gr:#34d399;--rd:#ff5c67}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,Segoe UI,Roboto,sans-serif}
+  header{padding:28px 32px 8px}
+  h1{margin:0;font-size:26px;letter-spacing:.5px}
+  .sub{color:var(--mut);margin:6px 0 0}
+  .tabs{display:flex;gap:8px;padding:16px 32px 0;flex-wrap:wrap}
+  .tab{padding:9px 18px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink);cursor:pointer;font-weight:600;font-size:14px}
+  .tab.on{background:var(--cy);color:#04121a;border-color:var(--cy)}
+  main{padding:20px 32px 60px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+  .prev{height:150px;display:grid;place-items:center;background:radial-gradient(circle at 50% 45%,rgba(34,211,238,.10),transparent 60%);border-radius:12px}
+  .prev svg{width:120px;height:120px}
+  .nm{font-weight:800;font-size:16px}
+  .tg{display:flex;flex-wrap:wrap;gap:5px}
+  .tg span{font-size:11px;color:var(--mut);background:#0a1a26;border:1px solid var(--line);border-radius:6px;padding:2px 7px}
+  .use{font:12px/1.4 ui-monospace,Consolas,monospace;color:var(--cy);background:#0a1a26;border-radius:8px;padding:8px;white-space:pre-wrap;word-break:break-word}
+  .badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;align-self:flex-start}
+  .safe{background:rgba(52,211,153,.15);color:var(--gr)}
+  .warn{background:rgba(255,92,103,.15);color:var(--rd)}
+  .hint{color:var(--mut);font-size:13px;margin:2px 0 14px}
+  a{color:var(--cy)}
+  section[hidden]{display:none}
+  .search{width:100%;max-width:420px;margin:0 0 18px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);font-size:14px}
+  .search::placeholder{color:var(--mut)}
+  .grp-h{font-size:13px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--cy);margin:22px 0 10px}
+  .grp-h:first-child{margin-top:4px}
+  .prev img{width:120px;height:120px}
+  .empty{color:var(--mut);font-size:13px;padding:16px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎬 Biblioteca de Animações</h1>
+  <p class="sub">Ilustrações e personagens reutilizáveis do pipeline — copie e reuse em split / hybrid / faceless.</p>
+</header>
+<div class="tabs">
+  <button class="tab on" data-t="heroes">Heróis SVG (à mão) · 22</button>
+  <button class="tab" data-t="illos">ILLOS (split-kit) · 19</button>
+  <button class="tab" data-t="lottie">Lottie · 9</button>
+  <button class="tab" data-t="ext">Fontes externas</button>
+</div>
+<main>
+  <section id="heroes">
+    <p class="hint">SVG feitos à mão — <b>capture-safe</b>. Copie o arquivo <code>heroes/&lt;id&gt;.svg</code> pro frame/card e recolora o stroke/fill conforme o acento. viewBox 320. Agrupados por tema.</p>
+    <input id="heroesSearch" class="search" type="search" placeholder="filtrar por nome ou tag… (ex.: dinheiro, prazo, cta)">
+    <div id="heroesGroups"></div>
+  </section>
+
+  <section id="illos" hidden>
+    <p class="hint"><b>capture-safe</b>, animadas. Uso no split-kit: <code>art:{type:'&lt;id&gt;'}</code>. Preview vivo em <code>_scaffolds/split-kit</code>.</p>
+    <div class="grid" id="illosGrid"></div>
+  </section>
+
+  <section id="lottie" hidden>
+    <p class="hint">⚠ Lottie SVG-puro <b>some no capture</b> do HyperFrames → usar CANVAS pré-renderizado (blueprint <code>_blueprint-lottie-hero</code>, cap MAXFR=60). No lote C-PRO I só <b>climbstairs</b> sobreviveu direto; para os demais preferir hero SVG até revalidar.</p>
+    <div class="grid" id="lottieGrid"></div>
+  </section>
+
+  <section id="ext" hidden>
+    <p class="hint">Fontes para buscar/baixar animações novas quando precisar.</p>
+    <div class="grid">
+      <div class="card"><div class="nm">LottieFiles</div><div class="tg"><span>lottie</span><span>personagens</span></div><div class="use">lottiefiles.com — usar canvas-prerender</div></div>
+      <div class="card"><div class="nm">Flaticon animated</div><div class="tg"><span>ícones</span><span>animados</span></div><div class="use">flaticon.com/animated-icons</div></div>
+      <div class="card"><div class="nm">Flow / Veo</div><div class="tg"><span>b-roll</span><span>cinematográfico</span></div><div class="use">base SEM texto (metáfora/ambiente)</div></div>
+    </div>
+  </section>
+</main>
+<script>
+// [id, tags(·), grupo] — arquivo em heroes/<id>.svg
+const HERO_GRP={financas:"💰 Finanças",tempo:"⏳ Tempo / prazo",certificacao:"🎓 Certificação",cta_confianca:"📣 CTA / confiança",cozinha_metafora:"🍳 Metáfora cozinha",alerta:"⚠️ Alerta"};
+const HEROES=[
+ ["coins","dinheiro·investimento·rendimento·capital·poupança","financas"],
+ ["hand-coin","investir·receber·ganhar·renda·retorno","financas"],
+ ["percent","rendimento·desconto·taxa·juros·percentual","financas"],
+ ["bank","banco·instituição·mercado·btg·seguro","financas"],
+ ["linechart","resultado·tendência·gráfico·alta·desempenho","financas"],
+ ["scale","comparar·equilíbrio·renda-x-patrimônio·escolha·risco","financas"],
+ ["growth-arrow","crescimento·alta·evolução·resultado·ganho","financas"],
+ ["calendar","prazo·data·deadline·20-dias·agenda·inscrição","tempo"],
+ ["clock","tempo·urgência·agora·rápido·hora","tempo"],
+ ["hourglass","tempo-acabando·última-chance·urgência·encerra","tempo"],
+ ["trophy","conquista·aprovação·1º-lugar·prêmio·sucesso","certificacao"],
+ ["check-circle","aprovado·feito·confirmado·ok·certo","certificacao"],
+ ["book","estudo·material·conteúdo·apostila·aprender","certificacao"],
+ ["whatsapp","contato·mensagem·whatsapp·fale-conosco·cta","cta_confianca"],
+ ["deal","parceria·fechamento·conexão·acordo·confiança","cta_confianca"],
+ ["lock","segurança·proteção·garantia·sigilo·confiança","cta_confianca"],
+ ["rocket","decolar·lançamento·crescimento-rápido·começar·impulso","cta_confianca"],
+ ["lightbulb","ideia·sacada·insight·dica·descoberta","cta_confianca"],
+ ["chef-hat","cozinha·receita·caminho·chef","cozinha_metafora"],
+ ["pot","cozinha·ingrediente·panela·preparo","cozinha_metafora"],
+ ["plate","cozinha·prato·básico·refeição","cozinha_metafora"],
+ ["warning","alerta·cilada·atenção·cuidado","alerta"]
+];
+const ILLOS=[["seal","certificação·selo·aprovação","label"],["exam","prova·checklist·material",""],["download","baixar·grátis·cta","label"],["chat","whatsapp·mensagem",""],["button","cta·clique·ação","label"],["refresh","atualizado·rota·ciclo",""],["target","objetivo·foco·referência","arrow"],["gradcap","aprovação·formatura·carreira",""],["shield","garantia·robusto·confiança",""],["lupa","análise·o-que-cai·pesquisa",""],["gift","grátis·bônus·incluído",""],["bars","crescimento·nível·ganhos","arrow"],["question","dúvida·cilada·hook",""],["person","cliente·assessor·você","ring"],["price0","grátis·sem-custo",""],["cue","sinuca·tacada",""],["num","número·stat·aprovados","to,prefix,suffix"],["arms","abraço·juntos",""],["star","destaque·referência·top",""]];
+const LOTTIE=[["climbstairs","nível·progresso·carreira","ok"],["runner","urgência·correr·tempo","?"],["graduation","aprovação·formatura","vazio"],["exam","prova·material","vazio"],["manworking","estudo·trabalho·foco","vazio"],["click","cta·clique","vazio"],["chat","mensagem·whatsapp","?"],["badge","certificação·selo","?"],["wave","olá·boas-vindas","?"]];
+function chips(s){return s.split('·').map(t=>`<span>${t}</span>`).join('')}
+function heroCard([id,tg]){return `<div class="card"><div class="prev"><img src="heroes/${id}.svg" alt="${id}" loading="lazy"></div><div class="nm">${id}</div><span class="badge safe">capture-safe</span><div class="tg">${chips(tg)}</div><div class="use">heroes/${id}.svg</div></div>`}
+function renderHeroes(q){
+  q=(q||'').trim().toLowerCase();
+  const box=document.getElementById('heroesGroups');
+  const groups=Object.keys(HERO_GRP);
+  let html='',any=false;
+  groups.forEach(g=>{
+    const items=HEROES.filter(h=>h[2]===g && (!q || h[0].toLowerCase().includes(q) || h[1].toLowerCase().includes(q)));
+    if(!items.length) return;
+    any=true;
+    html+=`<div class="grp-h">${HERO_GRP[g]} · ${items.length}</div><div class="grid">${items.map(heroCard).join('')}</div>`;
+  });
+  box.innerHTML=any?html:'<p class="empty">Nenhum hero com esse filtro.</p>';
+}
+renderHeroes('');
+document.getElementById('heroesSearch').addEventListener('input',e=>renderHeroes(e.target.value));
+document.getElementById('illosGrid').innerHTML=ILLOS.map(([id,tg,p])=>`<div class="card"><div class="nm">${id}</div>${p?`<div class="tg"><span>params: ${p}</span></div>`:''}<div class="tg">${chips(tg)}</div><div class="use">art:{type:'${id}'${p?", …":""}}</div></div>`).join('');
+document.getElementById('lottieGrid').innerHTML=LOTTIE.map(([id,tg,ok])=>`<div class="card"><div class="nm">${id}</div><span class="badge ${ok==='ok'?'safe':'warn'}">${ok==='ok'?'capture ok':ok==='vazio'?'⚠ vazio no capture':'não testado'}</span><div class="tg">${chips(tg)}</div><div class="use">&lt;script src="assets/lottie/${id}-data.js"&gt;</div></div>`).join('');
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');['heroes','illos','lottie','ext'].forEach(s=>document.getElementById(s).hidden=(s!==b.dataset.t));});
+</script>
+</body>
+</html>

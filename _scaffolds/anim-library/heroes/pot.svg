@@ -1,0 +1,10 @@
+<!-- pot — panela com vapor. ingrediente/preparo. -->
+<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <path d="M84 92 q6 -18 12 0" stroke="#22d3ee" stroke-width="7" stroke-linecap="round"/>
+  <path d="M154 82 q6 -22 12 0" stroke="#22d3ee" stroke-width="7" stroke-linecap="round"/>
+  <path d="M224 92 q6 -18 12 0" stroke="#22d3ee" stroke-width="7" stroke-linecap="round"/>
+  <rect x="70" y="128" width="180" height="110" rx="18" fill="#0e2a36" stroke="#22d3ee" stroke-width="10"/>
+  <rect x="46" y="150" width="28" height="34" rx="10" fill="#22d3ee"/>
+  <rect x="246" y="150" width="28" height="34" rx="10" fill="#22d3ee"/>
+  <line x1="70" y1="150" x2="250" y2="150" stroke="#22d3ee" stroke-width="9"/>
+</svg>

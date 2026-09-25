@@ -1,0 +1,5 @@
+<!-- whatsapp — contato/mensagem/fale-conosco. Recolorir stroke conforme o acento. -->
+<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <path d="M160 48 a108 108 0 1 0 54 202 l52 14 l-16 -50 a108 108 0 0 0 -90 -166 Z" fill="#06251c" stroke="#34d399" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M122 116 c-6 30 24 76 62 84 c14 3 26 -6 26 -18 c0 -8 -18 -18 -28 -14 c-6 2 -8 8 -14 6 c-14 -8 -24 -22 -26 -34 c-1 -6 8 -8 8 -16 c0 -8 -10 -22 -18 -20 c-6 2 -8 8 -10 26 Z" fill="#34d399"/>
+</svg>

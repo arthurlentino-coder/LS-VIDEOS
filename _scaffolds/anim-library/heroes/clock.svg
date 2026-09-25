@@ -1,0 +1,7 @@
+<!-- clock — tempo/urgencia/agora. Recolorir stroke conforme o acento. -->
+<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <circle cx="160" cy="164" r="116" fill="#2a1e08" stroke="#F5A623" stroke-width="14"/>
+  <line x1="160" y1="164" x2="160" y2="92" stroke="#F5A623" stroke-width="14" stroke-linecap="round"/>
+  <line x1="160" y1="164" x2="214" y2="196" stroke="#F5A623" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="160" cy="164" r="12" fill="#F5A623"/>
+</svg>

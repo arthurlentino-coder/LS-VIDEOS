@@ -1,0 +1,9 @@
+<!-- book — estudo/material/conteudo. Recolorir stroke conforme o acento. -->
+<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <path d="M160 88 c-36 -24 -76 -24 -112 -14 v148 c36 -10 76 -10 112 14 Z" fill="#0e2a36" stroke="#22d3ee" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M160 88 c36 -24 76 -24 112 -14 v148 c-36 -10 -76 -10 -112 14 Z" fill="#0e2a36" stroke="#22d3ee" stroke-width="12" stroke-linejoin="round"/>
+  <line x1="78" y1="128" x2="132" y2="136" stroke="#22d3ee" stroke-width="8" stroke-linecap="round"/>
+  <line x1="78" y1="164" x2="132" y2="172" stroke="#22d3ee" stroke-width="8" stroke-linecap="round"/>
+  <line x1="188" y1="136" x2="242" y2="128" stroke="#22d3ee" stroke-width="8" stroke-linecap="round"/>
+  <line x1="188" y1="172" x2="242" y2="164" stroke="#22d3ee" stroke-width="8" stroke-linecap="round"/>
+</svg>

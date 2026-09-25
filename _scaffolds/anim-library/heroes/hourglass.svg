@@ -1,0 +1,8 @@
+<!-- hourglass — tempo acabando/ultima chance. Recolorir stroke conforme o acento. -->
+<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <line x1="80" y1="48" x2="240" y2="48" stroke="#ff5c67" stroke-width="14" stroke-linecap="round"/>
+  <line x1="80" y1="272" x2="240" y2="272" stroke="#ff5c67" stroke-width="14" stroke-linecap="round"/>
+  <path d="M96 48 c0 70 128 70 128 112 c0 42 -128 42 -128 112" stroke="#ff5c67" stroke-width="14" fill="none"/>
+  <path d="M224 48 c0 70 -128 70 -128 112 c0 42 128 42 128 112" stroke="#ff5c67" stroke-width="14" fill="none"/>
+  <path d="M118 92 q42 44 84 0 Z" fill="#ff5c67" opacity="0.55"/>
+</svg>

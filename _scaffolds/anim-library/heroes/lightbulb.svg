@@ -1,0 +1,7 @@
+<!-- lightbulb — ideia/sacada/insight. Recolorir stroke conforme o acento. -->
+<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <path d="M160 44 c-52 0 -90 38 -90 86 c0 34 20 56 36 74 c8 9 10 18 10 28 h88 c0 -10 2 -19 10 -28 c16 -18 36 -40 36 -74 c0 -48 -38 -86 -90 -86 Z" fill="#2a1e08" stroke="#F5A623" stroke-width="12"/>
+  <rect x="128" y="238" width="64" height="20" rx="8" fill="#F5A623"/>
+  <rect x="136" y="262" width="48" height="18" rx="8" fill="#F5A623"/>
+  <path d="M134 148 l22 30 l16 -44" stroke="#F5A623" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,20 @@
+# Repositório versiona SÓ as bibliotecas reusáveis + brand.
+# Todo o resto (mídia bruta, saídas, projetos, masters) fica fora do git.
+
+# 1) ignora tudo na raiz
+/*
+
+# 2) reabre só o que interessa
+!/.gitignore
+!/_scaffolds/
+
+# 3) dentro de _scaffolds, ignora tudo menos as libs escolhidas
+/_scaffolds/*
+!/_scaffolds/anim-library/
+!/_scaffolds/broll-pool/
+!/_scaffolds/brand/
+
+# 4) artefatos de build/render regeneráveis dentro das libs
+/_scaffolds/broll-pool/_compositions/*/renders/
+**/.hf-segments/
+**/.debug/

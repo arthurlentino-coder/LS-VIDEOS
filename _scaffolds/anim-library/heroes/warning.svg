@@ -1,0 +1,6 @@
+<!-- warning — triangulo de alerta. cilada/atencao. -->
+<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <path d="M160 40 L300 292 H20 Z" fill="#2a0f12" stroke="#ff5c67" stroke-width="14" stroke-linejoin="round"/>
+  <rect x="146" y="120" width="28" height="96" rx="14" fill="#ff5c67"/>
+  <circle cx="160" cy="252" r="17" fill="#ff5c67"/>
+</svg>

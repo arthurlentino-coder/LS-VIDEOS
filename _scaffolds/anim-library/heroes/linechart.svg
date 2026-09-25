@@ -1,0 +1,10 @@
+<!-- linechart — resultado/tendencia/linha subindo. Recolorir stroke conforme o acento. -->
+<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <line x1="56" y1="56" x2="56" y2="256" stroke="#34d399" stroke-width="12" stroke-linecap="round"/>
+  <line x1="56" y1="256" x2="264" y2="256" stroke="#34d399" stroke-width="12" stroke-linecap="round"/>
+  <polyline points="80,220 130,178 176,206 232,110" stroke="#34d399" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="80" cy="220" r="10" fill="#34d399"/>
+  <circle cx="130" cy="178" r="10" fill="#34d399"/>
+  <circle cx="176" cy="206" r="10" fill="#34d399"/>
+  <circle cx="232" cy="110" r="13" fill="#F5A623"/>
+</svg>

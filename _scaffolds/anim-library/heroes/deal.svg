@@ -1,0 +1,7 @@
+<!-- deal — parceria/fechamento/aperto de maos. Recolorir stroke conforme o acento. -->
+<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <rect x="2" y="200" width="132" height="40" rx="20" transform="rotate(-20 68 220)" fill="#0e2a36" stroke="#22d3ee" stroke-width="12"/>
+  <rect x="186" y="200" width="132" height="40" rx="20" transform="rotate(20 252 220)" fill="#0e2a36" stroke="#22d3ee" stroke-width="12"/>
+  <path d="M118 150 q42 -34 84 0 q14 34 -12 58 q-30 22 -60 0 q-26 -24 -12 -58 Z" fill="#0e2a36" stroke="#22d3ee" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M148 150 v66 M170 148 v68 M192 156 v54" stroke="#22d3ee" stroke-width="8" stroke-linecap="round"/>
+</svg>

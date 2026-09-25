@@ -1,0 +1,91 @@
+{
+  "_doc": "Biblioteca de animacoes/ilustracoes reutilizaveis do pipeline. 3 familias: (1) ILLOS = ilustracoes SVG animadas do split-kit (capture-safe, animacao-assinatura embutida); (2) lottie = personagens/cenas Lottie do acervo (⚠ SVG puro MORRE no capture do HyperFrames -> usar CANVAS pre-renderizado, ver faceless-shotseq/_blueprint-lottie-hero); (3) heroes = icones SVG grandes feitos a mao (capture-safe, inline). Ver index.html p/ galeria. Reuso: copiar o <svg> do hero, ou art:{type} do ILLOS no split-kit, ou o <script src> do lottie.",
+  "familias": {
+    "illos": {
+      "fonte": "_scaffolds/split-kit/kit.js (ILLOS)",
+      "capture_safe": true,
+      "uso": "split-kit SCENES: art:{type:'<id>', ...}",
+      "itens": [
+        {"id": "seal", "desc": "medalha/selo com rotulo", "params": "label", "tags": ["certificacao","selo","aprovacao","marca"]},
+        {"id": "exam", "desc": "folha de prova com 3 checks", "tags": ["prova","checklist","material","apostila"]},
+        {"id": "download", "desc": "seta de download + tag", "params": "label", "tags": ["baixar","gratis","material","cta"]},
+        {"id": "chat", "desc": "balao de mensagem", "tags": ["whatsapp","suporte","mensagem","atendimento"]},
+        {"id": "button", "desc": "botao + cursor tocando", "params": "label", "tags": ["cta","clique","acao"]},
+        {"id": "refresh", "desc": "seta circular (atualizado)", "tags": ["atualizado","rota","ciclo","novo"]},
+        {"id": "target", "desc": "alvo + flecha cravando", "params": "arrow", "tags": ["objetivo","foco","meta","referencia","pessoas"]},
+        {"id": "gradcap", "desc": "capelo de formatura", "tags": ["aprovacao","formatura","carreira","diploma"]},
+        {"id": "shield", "desc": "escudo + check", "tags": ["garantia","seguranca","sem-pegadinha","robusto","confianca"]},
+        {"id": "lupa", "desc": "documento + lupa", "tags": ["analise","o-que-cai","pesquisa","investigar"]},
+        {"id": "gift", "desc": "presente com laco", "params": "", "tags": ["gratis","bonus","entrega","incluido"]},
+        {"id": "bars", "desc": "3 barras subindo + seta", "params": "arrow", "tags": ["crescimento","nivel","ganhos","carreira","evolucao"]},
+        {"id": "question", "desc": "'?' grande", "tags": ["duvida","cilada","hook","por-que"]},
+        {"id": "person", "desc": "pessoa + anel", "params": "ring", "tags": ["cliente","assessor","voce","perfil"]},
+        {"id": "price0", "desc": "'R$0' riscado", "tags": ["gratis","sem-custo","preco"]},
+        {"id": "cue", "desc": "taco+bola de sinuca + burst", "tags": ["sinuca","tacada","cpa-sinuca"]},
+        {"id": "num", "desc": "count-up numerico", "params": "to, prefix, suffix", "tags": ["numero","stat","quantidade","aprovados"]},
+        {"id": "arms", "desc": "bracos abertos + coracao", "tags": ["abraco","acolhimento","juntos"]},
+        {"id": "star", "desc": "estrela", "tags": ["destaque","referencia","top","premium"]}
+      ]
+    },
+    "lottie": {
+      "fonte": "_scaffolds/faceless-shotseq/assets/lottie/",
+      "capture_safe": false,
+      "gotcha": "SVG puro (renderer svg + goToAndStop) SOME no capture -> rasterizar em CANVAS (ver _blueprint-lottie-hero e cap de frames em MAXFR=60). CONFIRMADO: dos 9, so 'climbstairs' sobreviveu direto no lote C-PRO I; os demais renderam VAZIO -> preferir hero SVG p/ esses ate revalidar.",
+      "uso": "<script src='assets/lottie/<id>-data.js'> + var window.__<id>Data no blueprint lottie-hero",
+      "itens": [
+        {"id": "climbstairs", "var": "__climbStairsData", "desc": "pessoa de terno subindo degraus", "capture_ok": true, "tags": ["nivel","progresso","carreira","subir"]},
+        {"id": "runner", "var": "__runnerData", "desc": "corredor", "capture_ok": null, "tags": ["urgencia","correr","tempo"]},
+        {"id": "graduation", "var": "__graduationData", "desc": "formatura", "capture_ok": false, "tags": ["aprovacao","formatura","diploma"]},
+        {"id": "exam", "var": "__examData", "desc": "prova/checklist animada", "capture_ok": false, "tags": ["prova","material"]},
+        {"id": "manworking", "var": "__manWorkingData", "desc": "pessoa trabalhando/estudando", "capture_ok": false, "tags": ["estudo","trabalho","foco"]},
+        {"id": "click", "var": "__clickData", "desc": "cursor clicando", "capture_ok": false, "tags": ["cta","clique"]},
+        {"id": "chat", "var": "__chatData", "desc": "balao de chat", "capture_ok": null, "tags": ["mensagem","whatsapp"]},
+        {"id": "badge", "var": "__badgeData", "desc": "selo/badge", "capture_ok": null, "tags": ["certificacao","selo"]},
+        {"id": "wave", "var": "__waveData", "desc": "aceno/onda", "capture_ok": null, "tags": ["ola","boas-vindas"]}
+      ]
+    },
+    "heroes": {
+      "fonte": "_scaffolds/anim-library/heroes/*.svg",
+      "capture_safe": true,
+      "gotcha": "Texto dentro de forma (botao/selo/badge) NAO pode estourar -> textLength+lengthAdjust e conferir bbox. Escalaveis (500px hero faceless / 128px card hybrid). SVG puro sem transform de risco = capture-safe. Cada hero traz UM comentario no topo com o nome/semantica; recolorir stroke/fill conforme o acento (cy #22d3ee, am #F5A623, gr #34d399, rd #ff5c67). Os selo/download/num/price0 em formato GRANDE reusam os ILLOS equivalentes (seal/download/num/price0).",
+      "grupos": {
+        "financas": ["coins","hand-coin","percent","bank","linechart","scale","growth-arrow"],
+        "tempo": ["calendar","clock","hourglass"],
+        "certificacao": ["trophy","check-circle","book"],
+        "cta_confianca": ["whatsapp","deal","lock","rocket","lightbulb"],
+        "cozinha_metafora": ["chef-hat","pot","plate"],
+        "alerta": ["warning"]
+      },
+      "itens": [
+        {"id": "chef-hat", "file": "heroes/chef-hat.svg", "grp": "cozinha_metafora", "desc": "chapeu de chef (toque)", "tags": ["cozinha","receita","caminho","chef"]},
+        {"id": "pot", "file": "heroes/pot.svg", "grp": "cozinha_metafora", "desc": "panela com vapor", "tags": ["cozinha","ingrediente","panela","preparo"]},
+        {"id": "plate", "file": "heroes/plate.svg", "grp": "cozinha_metafora", "desc": "prato + garfo e faca", "tags": ["cozinha","prato","feijao-com-arroz","basico","refeicao"]},
+        {"id": "warning", "file": "heroes/warning.svg", "grp": "alerta", "desc": "triangulo de alerta", "tags": ["alerta","cilada","atencao","cuidado"]},
+        {"id": "growth-arrow", "file": "heroes/growth-arrow.svg", "grp": "financas", "desc": "seta de alta subindo", "tags": ["crescimento","alta","evolucao","resultado","ganho"]},
+        {"id": "coins", "file": "heroes/coins.svg", "grp": "financas", "desc": "pilha de moedas", "tags": ["dinheiro","investimento","rendimento","capital","poupanca"]},
+        {"id": "hand-coin", "file": "heroes/hand-coin.svg", "grp": "financas", "desc": "mao recebendo moeda", "tags": ["investir","receber","ganhar","renda","retorno"]},
+        {"id": "percent", "file": "heroes/percent.svg", "grp": "financas", "desc": "% num circulo", "tags": ["rendimento","desconto","taxa","juros","percentual"]},
+        {"id": "bank", "file": "heroes/bank.svg", "grp": "financas", "desc": "predio de banco com colunas", "tags": ["banco","instituicao","mercado","btg","seguro"]},
+        {"id": "linechart", "file": "heroes/linechart.svg", "grp": "financas", "desc": "grafico de linha subindo", "tags": ["resultado","tendencia","grafico","alta","desempenho"]},
+        {"id": "scale", "file": "heroes/scale.svg", "grp": "financas", "desc": "balanca de equilibrio", "tags": ["comparar","equilibrio","renda-x-patrimonio","escolha","risco"]},
+        {"id": "calendar", "file": "heroes/calendar.svg", "grp": "tempo", "desc": "calendario com dia marcado", "tags": ["prazo","data","deadline","20-dias","agenda","inscricao"]},
+        {"id": "clock", "file": "heroes/clock.svg", "grp": "tempo", "desc": "relogio", "tags": ["tempo","urgencia","agora","rapido","hora"]},
+        {"id": "hourglass", "file": "heroes/hourglass.svg", "grp": "tempo", "desc": "ampulheta", "tags": ["tempo-acabando","ultima-chance","urgencia","encerra"]},
+        {"id": "trophy", "file": "heroes/trophy.svg", "grp": "certificacao", "desc": "trofeu", "tags": ["conquista","aprovacao","1o-lugar","premio","sucesso"]},
+        {"id": "check-circle", "file": "heroes/check-circle.svg", "grp": "certificacao", "desc": "check grande num circulo", "tags": ["aprovado","feito","confirmado","ok","certo"]},
+        {"id": "book", "file": "heroes/book.svg", "grp": "certificacao", "desc": "livro aberto", "tags": ["estudo","material","conteudo","apostila","aprender"]},
+        {"id": "whatsapp", "file": "heroes/whatsapp.svg", "grp": "cta_confianca", "desc": "balao whatsapp", "tags": ["contato","mensagem","whatsapp","fale-conosco","cta"]},
+        {"id": "deal", "file": "heroes/deal.svg", "grp": "cta_confianca", "desc": "aperto de maos estilizado", "tags": ["parceria","fechamento","conexao","acordo","confianca"]},
+        {"id": "lock", "file": "heroes/lock.svg", "grp": "cta_confianca", "desc": "cadeado", "tags": ["seguranca","protecao","garantia","sigilo","confianca"]},
+        {"id": "rocket", "file": "heroes/rocket.svg", "grp": "cta_confianca", "desc": "foguete", "tags": ["decolar","lancamento","crescimento-rapido","comecar","impulso"]},
+        {"id": "lightbulb", "file": "heroes/lightbulb.svg", "grp": "cta_confianca", "desc": "lampada acesa", "tags": ["ideia","sacada","insight","dica","descoberta"]}
+      ]
+    }
+  },
+  "referencias_externas": {
+    "_doc": "Fontes de animacoes prontas p/ buscar/baixar quando precisar de novas (ver aux-tools + flow-veo).",
+    "lottiefiles": "https://lottiefiles.com — animacoes Lottie (usar canvas-prerender no HyperFrames)",
+    "flaticon_animated": "https://www.flaticon.com/animated-icons — icones animados (ref [[reference-flaticon-animated-icons]])",
+    "flow_veo": "Flow/Veo p/ b-roll cinematografico SEM texto (ref [[flow-veo-base-integration]])"
+  }
+}

@@ -1,0 +1,419 @@
+{
+  "_doc": "Pool de b-roll com tags. Use pick_broll.py p/ escolher por tema de cena. Landscape precisa reframe 9:16 no uso.",
+  "clips": [
+    {
+      "file": "clips/estudo-mesa.mp4",
+      "cat": "Carreira e estudo",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 6.9,
+      "desc": "Pessoa estudando/trabalhando na mesa com laptop, luz clara",
+      "tags": [
+        "estudo",
+        "trabalho",
+        "carreira",
+        "escritorio",
+        "laptop",
+        "foco",
+        "problema",
+        "preparacao",
+        "cansaco"
+      ]
+    },
+    {
+      "file": "clips/mercado-dados.mp4",
+      "cat": "Mercado financeiro",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 6.3,
+      "desc": "Profissional de terno olhando dashboards de trading em monitores",
+      "tags": [
+        "mercado",
+        "dados",
+        "trading",
+        "analise",
+        "profissional",
+        "sucesso",
+        "graficos",
+        "monitor",
+        "futuro"
+      ]
+    },
+    {
+      "file": "clips/fincapital.mp4",
+      "cat": "Consultoria",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 5.6,
+      "desc": "Reunião de 3 pessoas à mesa com laptop, consultoria/atendimento",
+      "tags": [
+        "reuniao",
+        "consultoria",
+        "atendimento",
+        "equipe",
+        "planejamento",
+        "cliente",
+        "conversa"
+      ]
+    },
+    {
+      "file": "clips/tela.mp4",
+      "cat": "Dados e gráficos",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 5.3,
+      "desc": "Pessoa em mesa escura com tela grande de gráficos, ambiente noturno",
+      "tags": [
+        "tela",
+        "dados",
+        "trading",
+        "escritorio",
+        "digital",
+        "graficos",
+        "monitor",
+        "noite",
+        "foco"
+      ]
+    },
+    {
+      "file": "clips/advisor-tablet.mp4",
+      "cat": "Consultoria",
+      "orient": "landscape",
+      "w": 3840,
+      "h": 2160,
+      "dur": 14.2,
+      "desc": "Dois executivos de terno, um mostrando tablet ao outro (consultor/cliente)",
+      "tags": [
+        "consultor",
+        "tablet",
+        "atendimento",
+        "reuniao",
+        "negocio",
+        "cliente",
+        "executivo"
+      ]
+    },
+    {
+      "file": "clips/invest-app.mp4",
+      "cat": "App e digital",
+      "orient": "landscape",
+      "w": 4096,
+      "h": 2160,
+      "dur": 8.9,
+      "desc": "Mão segurando celular com app de investimentos (candlestick)",
+      "tags": [
+        "app",
+        "investimento",
+        "celular",
+        "trading",
+        "digital",
+        "mobile",
+        "mercado",
+        "grafico"
+      ]
+    },
+    {
+      "file": "clips/laptop.mp4",
+      "cat": "Trabalho",
+      "orient": "landscape",
+      "w": 4096,
+      "h": 2160,
+      "dur": 10.2,
+      "desc": "Sobre o ombro, pessoa em laptop com dashboard/gráfico",
+      "tags": [
+        "laptop",
+        "trabalho",
+        "analise",
+        "dados",
+        "escritorio",
+        "graficos"
+      ]
+    },
+    {
+      "file": "clips/piechart.mp4",
+      "cat": "Dados e gráficos",
+      "orient": "landscape",
+      "w": 1920,
+      "h": 1080,
+      "dur": 7.3,
+      "desc": "Gráficos de pizza impressos em papel com lápis e óculos (análise)",
+      "tags": [
+        "grafico",
+        "analise",
+        "relatorio",
+        "dados",
+        "planejamento",
+        "pizza",
+        "papel"
+      ]
+    },
+    {
+      "file": "clips/dinheiro-cofre.mp4",
+      "cat": "Dinheiro",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 9.1,
+      "source": "pexels",
+      "desc": "Moedas caindo/enchendo um saco (poupança, acúmulo de dinheiro)",
+      "tags": ["dinheiro","moedas","poupanca","investimento","capital","rendimento","acumular","cofre"]
+    },
+    {
+      "file": "clips/dinheiro-mao.mp4",
+      "cat": "Dinheiro",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 12.8,
+      "source": "pexels",
+      "desc": "Moeda de ouro na mão em close (riqueza, valor, retorno)",
+      "tags": ["dinheiro","moeda","ouro","riqueza","valor","retorno","ganho","mao"]
+    },
+    {
+      "file": "clips/aperto-maos.mp4",
+      "cat": "Fechamento",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 4.6,
+      "source": "pexels",
+      "desc": "Aperto de mãos entre sócios/executivos (parceria, acordo)",
+      "tags": ["aperto-de-maos","parceria","acordo","fechamento","negocio","socios","confianca"]
+    },
+    {
+      "file": "clips/acordo-fechado.mp4",
+      "cat": "Fechamento",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 14.9,
+      "source": "pexels",
+      "desc": "Homem e mulher apertam as mãos fechando um acordo à mesa",
+      "tags": ["acordo","fechamento","aperto-de-maos","cliente","reuniao","contrato","parceria"]
+    },
+    {
+      "file": "clips/assinatura-contrato.mp4",
+      "cat": "Fechamento",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 7.6,
+      "source": "pexels",
+      "desc": "Homem assinando um contrato com caneta (decisão, contratação)",
+      "tags": ["contrato","assinatura","fechamento","decisao","contratar","documento","cliente"]
+    },
+    {
+      "file": "clips/estudo-dupla.mp4",
+      "cat": "Carreira e estudo",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 52.8,
+      "source": "pexels",
+      "desc": "Dois estudantes estudando juntos com material e anotações",
+      "tags": ["estudo","estudantes","preparacao","material","anotacoes","curso","aprender","juntos"]
+    },
+    {
+      "file": "clips/estudo-anotando.mp4",
+      "cat": "Carreira e estudo",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 14.9,
+      "source": "pexels",
+      "desc": "Estudante fazendo anotações a partir do livro (foco, dedicação)",
+      "tags": ["estudo","anotacoes","livro","foco","preparacao","material","dedicacao","aprender"]
+    },
+    {
+      "file": "clips/analise-lupa.mp4",
+      "cat": "Dados e gráficos",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 7.0,
+      "source": "pexels",
+      "desc": "Gráficos em papel com lupa em cima (análise, o que cai, investigar)",
+      "tags": ["analise","lupa","graficos","o-que-cai","investigar","relatorio","dados","pesquisa"]
+    },
+    {
+      "file": "clips/mercado-monitor.mp4",
+      "cat": "Mercado financeiro",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 7.0,
+      "source": "pexels",
+      "desc": "Pessoa acompanhando cotações do mercado na tela (trading, alta/baixa)",
+      "tags": ["mercado","trading","cotacoes","monitor","graficos","alta","dados","acompanhar"]
+    },
+    {
+      "file": "clips/sucessorio-docs.mp4",
+      "cat": "Consultoria",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 10.7,
+      "source": "pexels",
+      "desc": "Casal idoso revisando documentos (sucessório, aposentadoria, planejamento)",
+      "tags": ["sucessorio","idosos","documentos","aposentadoria","planejamento","familia","heranca","futuro"]
+    },
+    {
+      "file": "clips/calcular-gastos.mp4",
+      "cat": "Consultoria",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 17.4,
+      "source": "pexels",
+      "desc": "Casal calculando despesas com calculadora e contas (orçamento, planejamento)",
+      "tags": ["orcamento","despesas","calcular","contas","planejamento","familia","financas","economia"]
+    },
+    {
+      "file": "clips/consultoria-laptop.mp4",
+      "cat": "Consultoria",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 18.2,
+      "source": "pexels",
+      "desc": "Casal conversando enquanto olha o laptop (atendimento, decisão, planejamento)",
+      "tags": ["consultoria","atendimento","laptop","casal","conversa","planejamento","decisao","cliente"]
+    },
+    {
+      "file": "clips/celular-notificacao.mp4",
+      "cat": "Celular e app",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 6.7,
+      "source": "pexels",
+      "desc": "Notificação/mensagem chegando na tela do celular (whatsapp, alerta)",
+      "tags": ["celular","notificacao","whatsapp","mensagem","alerta","app","contato","tela"]
+    },
+    {
+      "file": "clips/celular-mensagem.mp4",
+      "cat": "Celular e app",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 26.4,
+      "source": "pexels",
+      "desc": "Pessoa recebendo e lendo mensagem no smartphone (whatsapp, contato)",
+      "tags": ["celular","whatsapp","mensagem","contato","smartphone","conversa","app","suporte"]
+    },
+    {
+      "file": "clips/celular-uso.mp4",
+      "cat": "Celular e app",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 12.2,
+      "source": "pexels",
+      "desc": "Close de pessoa usando o celular / rolando o app (mobile, digital)",
+      "tags": ["celular","app","mobile","digital","smartphone","scroll","uso","tela"]
+    },
+    {
+      "file": "clips/banco-predio.mp4",
+      "cat": "Cidade e prédio",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 7.9,
+      "source": "pexels",
+      "desc": "Colunata de prédio institucional, sem marca (banco, solidez, tradição)",
+      "tags": ["banco","colunas","instituicao","solidez","tradicao","corporativo","fachada","mercado"]
+    },
+    {
+      "file": "clips/predio-fachada.mp4",
+      "cat": "Cidade e prédio",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 10.0,
+      "source": "pexels",
+      "desc": "Fachada de prédio corporativo em movimento vertical (empresa, sede)",
+      "tags": ["predio","fachada","corporativo","empresa","sede","cidade","negocio","instituicao"]
+    },
+    {
+      "file": "clips/predio-torre.mp4",
+      "cat": "Cidade e prédio",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 10.0,
+      "source": "pexels",
+      "desc": "Torre corporativa em contra-plongée (mercado, grandeza, futuro)",
+      "tags": ["predio","torre","corporativo","cidade","mercado","grandeza","futuro","skyline"]
+    },
+    {
+      "file": "clips/formatura-capelo.mp4",
+      "cat": "Formatura e aprovação",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 10.6,
+      "source": "pexels",
+      "desc": "Formandos jogando o capelo pro alto (aprovação, conquista, celebração)",
+      "tags": ["formatura","aprovacao","conquista","capelo","certificacao","celebracao","sucesso","carreira"]
+    },
+    {
+      "file": "clips/formatura-diploma.mp4",
+      "cat": "Formatura e aprovação",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 11.2,
+      "source": "pexels",
+      "desc": "Formandas segurando o diploma (certificação, aprovação, orgulho)",
+      "tags": ["formatura","diploma","certificacao","aprovacao","orgulho","conquista","carreira","titulo"]
+    },
+    {
+      "file": "clips/formatura-recebe.mp4",
+      "cat": "Formatura e aprovação",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 18.1,
+      "source": "pexels",
+      "desc": "Formando recebendo o diploma no palco (aprovação, reconhecimento)",
+      "tags": ["formatura","diploma","palco","aprovacao","reconhecimento","cerimonia","conquista","carreira"]
+    },
+    {
+      "file": "clips/formatura-comemora.mp4",
+      "cat": "Formatura e aprovação",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 32.4,
+      "source": "pexels",
+      "desc": "Formando comemorando ao receber o diploma (alegria, vitória, aprovação)",
+      "tags": ["formatura","comemoracao","alegria","vitoria","aprovacao","diploma","conquista","emocao"]
+    },
+    {
+      "file": "clips/celular-conversa.mp4",
+      "cat": "Celular e app",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 24.1,
+      "source": "pexels",
+      "desc": "Pessoa digitando numa conversa de chat no celular (mensagem, contato, atendimento)",
+      "tags": ["celular","conversa","chat","mensagem","digitar","contato","atendimento","app"]
+    },
+    {
+      "file": "clips/whatsapp-verde.mp4",
+      "cat": "Celular e app",
+      "orient": "portrait",
+      "w": 1080,
+      "h": 1920,
+      "dur": 6.5,
+      "source": "composto",
+      "desc": "Card verde estilo WhatsApp (Lucas Silva, avatar tubarao) sobre celular: Lucas DIGITANDO (status digitando...) -> mensagem do Lucas -> a dona do celular responde no verde com ticks. Composto no HyperFrames (fonte em _compositions/whatsapp-verde).",
+      "tags": ["whatsapp","verde","mensagem","chat","cta","contato","garantir-vaga","lucas-silva","notificacao"]
+    }
+  ]
+}

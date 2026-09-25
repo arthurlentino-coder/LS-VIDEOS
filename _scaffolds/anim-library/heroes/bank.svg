@@ -1,0 +1,9 @@
+<!-- bank — banco/instituicao/mercado. Recolorir stroke conforme o acento. -->
+<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <path d="M160 48 L288 112 H32 Z" fill="#0e2a36" stroke="#22d3ee" stroke-width="12" stroke-linejoin="round"/>
+  <line x1="72" y1="140" x2="72" y2="224" stroke="#22d3ee" stroke-width="16" stroke-linecap="round"/>
+  <line x1="120" y1="140" x2="120" y2="224" stroke="#22d3ee" stroke-width="16" stroke-linecap="round"/>
+  <line x1="200" y1="140" x2="200" y2="224" stroke="#22d3ee" stroke-width="16" stroke-linecap="round"/>
+  <line x1="248" y1="140" x2="248" y2="224" stroke="#22d3ee" stroke-width="16" stroke-linecap="round"/>
+  <rect x="44" y="248" width="232" height="24" rx="8" fill="#22d3ee"/>
+</svg>

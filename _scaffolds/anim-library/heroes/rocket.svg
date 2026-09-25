@@ -1,0 +1,8 @@
+<!-- rocket — decolar/lancamento/crescimento rapido. Recolorir stroke conforme o acento. -->
+<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <path d="M160 32 c44 34 60 90 60 138 l-40 34 h-40 l-40 -34 c0 -48 16 -104 60 -138 Z" fill="#0e2a36" stroke="#22d3ee" stroke-width="12"/>
+  <circle cx="160" cy="120" r="24" fill="#07131f" stroke="#22d3ee" stroke-width="12"/>
+  <path d="M100 176 l-32 40 l40 -6" stroke="#22d3ee" stroke-width="12" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M220 176 l32 40 l-40 -6" stroke="#22d3ee" stroke-width="12" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M144 240 q16 42 32 0" stroke="#F5A623" stroke-width="14" fill="none" stroke-linecap="round"/>
+</svg>
