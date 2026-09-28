@@ -64,15 +64,27 @@ de `BASE_COMMIT` + `render.py.patch` + `hf_subs.py` + `hf.ps1` + `pip install -e
 | `_scaffolds/flow-hybrid/` | contrato para base cinematográfica gerada no Flow/Veo |
 | `_codex/video-system/` | presets de zonas e gramática visual + `qa/video-qa.mjs` (QA do faceless shot-sequence) |
 
-### 1.5 Fontes externas de assets e integrações opcionais
+### 1.5 Fontes externas de assets
 - **LottieFiles** e **Flaticon animated icons** — personagens e ícones animados (vetor, sem PNG).
 - **Tabler Icons** (MIT) — ícones estáticos recoloríveis.
 - **Pexels / Pixabay / Mixkit / Coverr** — b-roll grátis de uso comercial; normalizar para
   1080×1920, sem áudio, e registrar no `broll.json`. Nada de marca/instituição real visível.
-- **Google Flow / Veo** (opcional) — base cinematográfica SEM texto por cena; gerar manualmente
-  no Flow; toda informação legível vem do HyperFrames (README §7.3.3).
-- **Opus Clip** (opcional) — corte/reenquadramento; desligar a legenda dele e usar a nossa karaokê.
 - **Windows Task Scheduler** — tarefa `MesaDeCorte-QueueNotify` (avisa pedido pendente fora de sessão).
+
+### 1.6 Integrações opcionais
+Nenhuma é necessária para entregar. Chaves ficam no `.env` do video-use (ou no ambiente) — nunca
+exibir nem pedir em chat. **Tudo que gasta crédito: confirmar com o usuário antes de rodar.**
+
+| Integração | Para quê | Acesso | Como entra no processo |
+|---|---|---|---|
+| **Google Flow / Veo** | base cinematográfica por cena (ambiente, metáfora, pessoa) | web do Flow (geração manual; a API Gemini dá limite) | base SEM texto; todo texto vem do HyperFrames; contrato em `_scaffolds/flow-hybrid/` (README §7.3.3) |
+| **Opus Clip** | vídeo longo → cortes curtos com reenquadramento por falante | API `api.opus.pro`, `OPUS_API_KEY` (Bearer); arquivo local via `upload-links` | criar o projeto com `renderPref.enableCaption=false` e queimar a nossa karaokê por cima |
+| **Descript** | edição por transcrição, limpeza de áudio (Studio Sound), filler words, dublagem | API `descriptapi.com/v1`, `DESCRIPT_API_KEY` (token inteiro como Bearer) | limpeza de áudio ruim ou tradução; o corte continua sendo o nosso EDL |
+| **Topaz Video** | upscale, denoise, estabilização, interpolação de frames | API `api.topazlabs.com`, `TOPAZ_API_KEY` (header `X-API-Key`) | recuperar bruta de baixa qualidade antes do master |
+| **Freepik** | stock licenciado (fotos, vetores, ícones) + geração por IA (Mystic, Kling, Runway) | API `api.freepik.com`, `FREEPIK_API_KEY` (header `x-freepik-api-key`); cliente em `_codex/video-system/tools/freepik.mjs` | asset sob medida quando o stock grátis não casa com a ideia da cena |
+| **Hera / Kling / Firefly** | geração de ícones/animações por IA | `HERA_API_KEY` no `.env`; Kling/Firefly pela conta do usuário | só se superar o motion feito à mão (que é o padrão) |
+| **HeyGen CLI** | catálogo de música/SFX (e TTS) da HeyGen | `~\.local\bin\heygen` → `heygen auth login --key` (o usuário faz) | faixa real no lugar da trilha sintetizada; sem login, usar `pipeline-kit/audio/trilha.py` |
+| **Pippit** (skill `pippit-skill`) | geração/edição por IA e publicação/agendamento em TikTok, Instagram, Facebook | access key do Pippit (setup pela própria skill) | só se o usuário pedir publicação ou geração pela Pippit |
 
 Variáveis de sessão (README §1): `$VIDEOS`, `$HELPERS`, `$PYSCRIPTS`, `$TOOLS`. Portabilidade:
 `VIDEO_USE_HELPERS` e `HF_SFX_DIR` sobrescrevem os caminhos padrão. Rodar Python com
@@ -169,6 +181,8 @@ no fps da fonte. VSL: +1 s de handle no fim.
 ## 8. Primeira resposta esperada
 
 Antes de editar: status de cada ferramenta da §1.1 e §1.2 (ok/falta), se a chave Scribe respondeu,
-se o app sobe em :8756, se o watcher está armado e quais pedidos estão pendentes em `orders/`.
+se o app sobe em :8756, se o watcher está armado, quais pedidos estão pendentes em `orders/` e,
+das integrações opcionais (§1.6), quais têm chave ou login configurado — só checar a presença, sem
+chamada que gaste crédito.
 
 ==========================================================================
