@@ -14,6 +14,10 @@ edit/
   hf/yunet_ort.py       decoder YuNet via onnxruntime (o cv2 5.0 retorna 0 faces)
   hf/yunet.onnx         modelo YuNet (opencv_zoo)
   hf/sfx_mix.py         SFX de `sfx.json` + loudnorm (usado pelo finish_split)
+audio/
+  trilha.py             bed sintetizado (moods calmo/serio/energico): build-bed | build-all | apply
+                        (ducking sob a fala + whooshes + loudnorm -14) → <nome>_trilha.mp4
+  music_gen.py          trilha musical original p/ recap/aftermovie: py music_gen.py <out.wav> [dur] [bpm]
 video-use/
   BASE_COMMIT           commit do browser-use/video-use que usamos
   render.py.patch       nossas mudanças no render.py (VIDEO_USE_FPS, retrato ciente de rotação…)
