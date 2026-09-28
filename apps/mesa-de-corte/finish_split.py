@@ -47,6 +47,8 @@ def main():
     edit = Path(a.edit).resolve()
 
     # GATE de certificacao: barra 'CPA' num video CPRO-I etc. (bypass: SKIP_CERT=1)
+    # GATE de certificacao, fail-closed: qualquer falha do gate aborta a finalizacao.
+    # Bypass consciente: SKIP_CERT=1.
     try:
         sys.path.insert(0, str(Path(__file__).resolve().parent))
         import check_cert
@@ -54,7 +56,10 @@ def main():
     except SystemExit:
         raise
     except Exception as e:
-        print(f"[check_cert] aviso: gate nao rodou ({e})")
+        if os.environ.get("SKIP_CERT") == "1":
+            print(f"[check_cert] gate falhou ({e}) — ignorado por SKIP_CERT=1")
+        else:
+            sys.exit(f"[check_cert] gate falhou ({e}) — finalizacao abortada (SKIP_CERT=1 p/ forcar)")
 
     motion = Path(a.motion) if a.motion else edit / "hf" / "split_motion.mp4"
     base = Path(a.base) if a.base else edit / "base_zoom_seam.mp4"

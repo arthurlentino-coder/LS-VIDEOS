@@ -103,6 +103,16 @@ def gate(edit, files=None, cert=None, label="motion"):
     if os.environ.get("SKIP_CERT") == "1":
         print(f"[check_cert] SKIP_CERT=1 — gate de certificacao pulado ({label}).")
         return
+    # fail-closed: arquivo de motion pedido e ausente/ilegivel = gate nao checou nada -> aborta
+    if files is not None:
+        if not files:
+            sys.exit(f"[check_cert] nenhum arquivo de motion encontrado p/ {label} — gate nao pode checar.")
+        for f in files:
+            p = Path(f) if Path(f).is_absolute() else Path(edit) / f
+            try:
+                p.read_text("utf-8", errors="replace")
+            except OSError as e:
+                sys.exit(f"[check_cert] arquivo de motion ausente/ilegivel ({label}): {p} ({e})")
     expected, issues = run_check(edit, cert=cert, only_files=files)
     if expected is None:
         print(f"[check_cert] cert esperada nao inferida ({label}) — gate nao aplicado.")

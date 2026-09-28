@@ -821,7 +821,10 @@ hybrid, faceless, trilha). Não é gate automático — é a passada final consc
 
 - **Gate `check_cert.py`**: cruza a certificação esperada (nota do `edl.json` ou `--cert`) com todo
   texto do motion e barra família divergente (CPA × CPRO-I × CPRO-R × CFP × ANBIMA × CEA × CGA).
-  Bypass `SKIP_CERT=1` só com motivo. Atenção: no `finish_split` o gate é *fail-open* se o import falhar.
+  Bypass `SKIP_CERT=1` só com motivo. O gate é **fail-closed** nos 3 finalizadores: erro interno ou arquivo de motion ausente/ilegível
+  aborta. Faceless checa `hf/faceless/index.html` + `compositions/frames/*.html`. Conteúdo sem
+  certificação (nota do edl sem cert) passa. Limite conhecido: vídeo que cita VÁRIAS certs de propósito
+  (ex.: "CPA · CPRO-R · CPRO-I", "Tem CPA?" como pré-requisito) é bloqueado → conferir e usar `SKIP_CERT=1`.
 - **QA do lote:** `py apps/mesa-de-corte/qa_lote.py <lote> [fmt…]` — duração entre formatos,
   −14 ±1,5 LUFS, frame preto, mudo, 1080×1920/~30fps. Depois `/watch` nos entregáveis.
 - Os finalizadores têm `HELPERS` com caminho absoluto (`C:\Users\betat\Desktop\claude\video use\helpers`) —

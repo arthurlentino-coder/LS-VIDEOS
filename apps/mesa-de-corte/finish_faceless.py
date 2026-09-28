@@ -32,16 +32,20 @@ def main():
     edit = Path(a.edit).resolve()
 
     # GATE — checa todos os frames autorais do faceless
+    # GATE de certificacao, fail-closed: qualquer falha do gate aborta a finalizacao.
+    # Bypass consciente: SKIP_CERT=1.
     try:
         sys.path.insert(0, str(Path(__file__).resolve().parent))
         import check_cert
-        frames = edit / "hf" / "faceless" / "compositions" / "frames"
-        fl = [str(p.relative_to(edit)) for p in sorted(frames.glob("*.html"))] if frames.is_dir() else None
+        fl = ["hf/faceless/index.html"] + [str(p.relative_to(edit)) for p in sorted((edit / "hf" / "faceless" / "compositions" / "frames").glob("*.html"))]
         check_cert.gate(edit, files=fl, label="faceless")
     except SystemExit:
         raise
     except Exception as e:
-        print(f"[check_cert] aviso: gate nao rodou ({e})")
+        if os.environ.get("SKIP_CERT") == "1":
+            print(f"[check_cert] gate falhou ({e}) — ignorado por SKIP_CERT=1")
+        else:
+            sys.exit(f"[check_cert] gate falhou ({e}) — finalizacao abortada (SKIP_CERT=1 p/ forcar)")
 
     prenorm = Path(a.prenorm) if a.prenorm else edit / "hf" / "faceless_prenorm.mp4"
     if not prenorm.exists():
