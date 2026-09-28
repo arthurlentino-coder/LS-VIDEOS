@@ -827,8 +827,7 @@ hybrid, faceless, trilha). Não é gate automático — é a passada final consc
   (ex.: "CPA · CPRO-R · CPRO-I", "Tem CPA?" como pré-requisito) é bloqueado → conferir e usar `SKIP_CERT=1`.
 - **QA do lote:** `py apps/mesa-de-corte/qa_lote.py <lote> [fmt…]` — duração entre formatos,
   −14 ±1,5 LUFS, frame preto, mudo, 1080×1920/~30fps. Depois `/watch` nos entregáveis.
-- Os finalizadores têm `HELPERS` com caminho absoluto (`C:\Users\betat\Desktop\claude\video use\helpers`) —
-  ajustar em outra máquina.
+- Os finalizadores acham os helpers por `VIDEO_USE_HELPERS` ou `<pai de VIDEOS>/claude/video use/helpers` (§13.4).
 
 ### 13.3 Kits e bibliotecas (`_scaffolds/`)
 | Pasta | Uso |
