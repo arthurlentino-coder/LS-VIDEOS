@@ -1,0 +1,15 @@
+{
+  "endpoint": "/v1/ai/image-to-video/veo-3-1-fast",
+  "input": {
+    "image": "https://example.com/reference.png",
+    "prompt": "Slow cinematic push-in, subtle natural movement, coherent lighting, no letters, no words, no numbers, no captions",
+    "negative_prompt": "text, logo, watermark, deformation, flicker",
+    "duration": 6,
+    "resolution": "1080p",
+    "aspect_ratio": "9:16",
+    "generate_audio": false,
+    "seed": 1842
+  },
+  "output": "../../../projects/EXEMPLO/edit/assets/generated/01-freepik.mp4",
+  "poll_seconds": 10
+}

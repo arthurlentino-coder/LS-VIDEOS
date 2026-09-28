@@ -1,0 +1,27 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"/>
+<script src="vendor/gsap.min.js"></script>
+<link rel="stylesheet" href="kit.css">
+</head><body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="8.0" data-width="1080" data-height="1920" data-fps="30">
+  <div class="bg"></div>
+  <!-- B-ROLL: declarar 1 <video class="clip"> por cena 'broll' (nível root), com data-start/duration da janela -->
+  <video class="clip" src="assets/broll-demo.mp4" data-start="6.0" data-duration="2.0" muted></video>
+  <div class="grade"></div>
+  <div id="capwrap"></div>
+</div>
+<script src="assets/cues.js"></script>
+<script src="kit.js"></script>
+<script>
+// === edite SÓ isto: a lista de cenas (tipo + tempos + conteúdo). Tempos = do transcript. ===
+var SCENES = [
+  { type:"isoladas", start:0.0, end:3.5, ebc:"co", eb:"O ERRO COMUM",
+    hl:"CERTIFICAÇÃO<br><span class='co'>ISOLADA</span>",
+    items:["CPA","CPRO-I","CPRO-R","CFP"], heroAt:0.6 },
+  { type:"grid", start:3.5, end:6.0, ebc:"gr", eb:"ACESSO VITALÍCIO",
+    hl:"TODOS OS CURSOS<br><span class='gr'>PARA SEMPRE</span>",
+    items:["CPA","CPRO-I","CPRO-R","CFP"], futbar:"+ TODOS OS CURSOS FUTUROS", seal:"PARA SEMPRE",
+    heroAt:3.9, futAt:4.6, sealAt:5.2 },
+  { type:"broll", start:6.0, end:8.0, ltc:"gr", lt:"PRONTO PRA SEMPRE", ltAt:6.2 }
+];
+FacelessKit.build({ duration:8.0, scenes:SCENES, cues:window.__cues });
+</script></body></html>

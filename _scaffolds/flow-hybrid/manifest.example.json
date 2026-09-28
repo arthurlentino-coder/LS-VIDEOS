@@ -1,0 +1,16 @@
+{
+  "project": "EXEMPLO",
+  "duration": 15.0,
+  "scenes": [
+    {
+      "id": "01",
+      "start": 0.0,
+      "duration": 7.5,
+      "source": "incoming/01.mp4",
+      "kicker": "Contexto",
+      "headline": "HEADLINE CONTROLADA",
+      "accent": "#f3b841",
+      "palette": "gold"
+    }
+  ]
+}

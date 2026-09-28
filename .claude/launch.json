@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mesa-de-corte",
+      "runtimeExecutable": "py",
+      "runtimeArgs": ["apps/mesa-de-corte/server.py"],
+      "port": 8756
+    },
+    {
+      "name": "b3-runner-debug",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "http-server", "C:\\Users\\betat\\Desktop\\VIDEOS\\projects\\teste1\\edit\\hf\\split\\public", "-p", "4173", "-c-1"],
+      "port": 4173
+    }
+  ]
+}

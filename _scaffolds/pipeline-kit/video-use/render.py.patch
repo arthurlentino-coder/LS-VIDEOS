@@ -1,0 +1,313 @@
+diff --git a/helpers/render.py b/helpers/render.py
+index 0d02cff..ea3ecb6 100644
+--- a/helpers/render.py
++++ b/helpers/render.py
+@@ -23,11 +23,17 @@ from __future__ import annotations
+ 
+ import argparse
+ import json
++import os
+ import re
+ import subprocess
+ import sys
+ from pathlib import Path
+ 
++# Output frame rate. Default 24 (cinematic). For screen / social content that is
++# natively 30fps, set VIDEO_USE_FPS=30 to match the source and avoid 30->24
++# judder ("travado") and any A/V drift from frame-rate resampling.
++OUTPUT_FPS = os.environ.get("VIDEO_USE_FPS", "24")
++
+ try:
+     from grade import get_preset, auto_grade_for_clip  # same directory
+ except Exception:
+@@ -132,20 +138,72 @@ def is_hdr_source(video: Path) -> bool:
+ 
+ 
+ def is_portrait_source(video: Path) -> bool:
+-    """Return True if the video's height > width (portrait / vertical)."""
++    """Return True if the video's *display* height > width (portrait / vertical).
++
++    Rotation-aware: phones store sensor frames in landscape (e.g. 3840x2160) and
++    add a 90/270 degree display matrix. ffmpeg auto-rotates on decode, so the
++    effective frame is portrait. We must swap stored w/h when such a rotation
++    exists, otherwise the scale filter picks the wrong axis and the output is
++    distorted / oversized.
++    """
+     try:
+         out = subprocess.run(
+             ["ffprobe", "-v", "error", "-select_streams", "v:0",
+-             "-show_entries", "stream=width,height",
+-             "-of", "csv=p=0", str(video)],
++             "-show_entries", "stream=width,height:stream_side_data=rotation",
++             "-of", "default=noprint_wrappers=1", str(video)],
+             capture_output=True, text=True, check=True,
+         )
+-        w, h = map(int, out.stdout.strip().split(","))
++        w = h = None
++        rot = 0
++        for line in out.stdout.splitlines():
++            line = line.strip()
++            if line.startswith("width="):
++                w = int(line.split("=", 1)[1])
++            elif line.startswith("height="):
++                h = int(line.split("=", 1)[1])
++            elif line.startswith("rotation="):
++                rot = int(float(line.split("=", 1)[1]))
++        if w is None or h is None:
++            return False
++        if abs(rot) % 180 == 90:
++            w, h = h, w
+         return h > w
+     except Exception:
+         return False
+ 
+ 
++def source_display_dims(video: Path) -> tuple[int, int] | None:
++    """Return the (width, height) of the decoded/auto-rotated frame, or None.
++
++    Same rotation-awareness as is_portrait_source: a 90/270 display matrix swaps
++    stored w/h because ffmpeg auto-rotates on decode.
++    """
++    try:
++        out = subprocess.run(
++            ["ffprobe", "-v", "error", "-select_streams", "v:0",
++             "-show_entries", "stream=width,height:stream_side_data=rotation",
++             "-of", "default=noprint_wrappers=1", str(video)],
++            capture_output=True, text=True, check=True,
++        )
++        w = h = None
++        rot = 0
++        for line in out.stdout.splitlines():
++            line = line.strip()
++            if line.startswith("width="):
++                w = int(line.split("=", 1)[1])
++            elif line.startswith("height="):
++                h = int(line.split("=", 1)[1])
++            elif line.startswith("rotation="):
++                rot = int(float(line.split("=", 1)[1]))
++        if w is None or h is None:
++            return None
++        if abs(rot) % 180 == 90:
++            w, h = h, w
++        return w, h
++    except Exception:
++        return None
++
++
+ # -------- Per-segment extraction (Rule 2 + Rule 3) --------------------------
+ 
+ 
+@@ -157,12 +215,19 @@ def extract_segment(
+     out_path: Path,
+     preview: bool = False,
+     draft: bool = False,
++    crop_x: float | None = None,
+ ) -> None:
+     """Extract a cut range as its own MP4 with grade + 30ms audio fades baked in.
+ 
+     `-ss` before `-i` for fast accurate seeking. Scale to 1080p from 4K.
+     Portrait sources (height > width) are scaled by height to preserve orientation.
+ 
++    If `crop_x` is given (a fraction in [0,1] of the source width), the segment is
++    treated as a landscape source repurposed into a vertical 9:16 with punch-in:
++    a full-height 9:16 slice is cropped, centered horizontally at `crop_x`, then
++    scaled to 1080×1920. This lets one EDL frame a single landscape take per cut
++    (e.g. crop_x=0.5 centers; a lower/higher value follows whoever is speaking).
++
+     Quality ladder:
+       - final (default): 1080p libx264 fast CRF 20
+       - preview:         1080p libx264 medium CRF 22 (evaluable for QC)
+@@ -171,15 +236,34 @@ def extract_segment(
+     out_path.parent.mkdir(parents=True, exist_ok=True)
+ 
+     portrait = is_portrait_source(source)
+-    if draft:
+-        scale = "scale=-2:1280" if portrait else "scale=1280:-2"
++    if crop_x is not None:
++        # Vertical 9:16 punch-in from a landscape source. Crop a full-height,
++        # even-width 9:16 slice centered at crop_x*width (clamped in-frame), then
++        # scale to the target. Geometry is computed in Python (not as an ffmpeg
++        # crop expression) because the crop filter splits on the commas inside
++        # multi-arg functions like clip(); plain integers sidestep that.
++        target = "720:1280" if draft else "1080:1920"
++        dims = source_display_dims(source)
++        if dims is None:
++            raise RuntimeError(f"could not probe dimensions for crop_x on {source}")
++        sw, sh = dims
++        cw = (int(sh * 9 / 16) // 2) * 2          # even width
++        cw = min(cw, (sw // 2) * 2)               # never wider than the source
++        cx = int(round(sw * float(crop_x) - cw / 2))
++        cx = max(0, min(cx, sw - cw))
++        cx = (cx // 2) * 2                        # even x for chroma alignment
++        # setsar=1: the even-width crop leaves a ~1px aspect remainder; declare
++        # square pixels so the output is treated as clean 9:16.
++        geom = f"crop={cw}:{sh}:{cx}:0,scale={target},setsar=1"
++    elif draft:
++        geom = "scale=-2:1280" if portrait else "scale=1280:-2"
+     else:
+-        scale = "scale=-2:1920" if portrait else "scale=1920:-2"
++        geom = "scale=-2:1920" if portrait else "scale=1920:-2"
+ 
+     vf_parts: list[str] = []
+     if is_hdr_source(source):
+         vf_parts.append(TONEMAP_CHAIN)
+-    vf_parts.append(scale)
++    vf_parts.append(geom)
+     if grade_filter:
+         vf_parts.append(grade_filter)
+     vf = ",".join(vf_parts)
+@@ -203,7 +287,7 @@ def extract_segment(
+         "-vf", vf,
+         "-af", af,
+         "-c:v", "libx264", "-preset", preset, "-crf", crf,
+-        "-pix_fmt", "yuv420p", "-r", "24",
++        "-pix_fmt", "yuv420p", "-r", OUTPUT_FPS,
+         "-c:a", "aac", "-b:a", "192k", "-ar", "48000",
+         "-movflags", "+faststart",
+         str(out_path),
+@@ -251,11 +335,14 @@ def extract_all_segments(
+         else:
+             seg_filter = resolved
+ 
++        crop_x = r.get("crop_x")
+         note = r.get("beat") or r.get("note") or ""
+-        print(f"  [{i:02d}] {src_name}  {start:7.2f}-{end:7.2f}  ({duration:5.2f}s)  {note}")
++        punch = f"  punch-in@{crop_x}" if crop_x is not None else ""
++        print(f"  [{i:02d}] {src_name}  {start:7.2f}-{end:7.2f}  ({duration:5.2f}s)  {note}{punch}")
+         if is_auto:
+             print(f"        grade: {seg_filter or '(none)'}")
+-        extract_segment(src_path, start, duration, seg_filter, out_path, preview=preview, draft=draft)
++        extract_segment(src_path, start, duration, seg_filter, out_path, preview=preview, draft=draft,
++                        crop_x=(float(crop_x) if crop_x is not None else None))
+         seg_paths.append(out_path)
+ 
+     return seg_paths
+@@ -283,6 +370,60 @@ def concat_segments(segment_paths: list[Path], out_path: Path, edit_dir: Path) -
+     concat_list.unlink(missing_ok=True)
+ 
+ 
++def concat_segments_xfade(
++    segment_paths: list[Path],
++    durations: list[float],
++    out_path: Path,
++    xfade_dur: float,
++    preview: bool = False,
++) -> None:
++    """Concat with a short crossfade (video dissolve + audio acrossfade) at every
++    junction, instead of a hard cut. Smooths jump cuts on single-take talking
++    heads. Requires a re-encode (xfade is a filtergraph op, not stream copy).
++
++    Total output length = sum(durations) - (N-1) * xfade_dur, because each of the
++    N-1 junctions overlaps the two clips by `xfade_dur`. The subtitle builder must
++    use the same overlap so cues stay aligned (see build_subs.py crossfade_s).
++    """
++    n = len(segment_paths)
++    inputs: list[str] = []
++    for p in segment_paths:
++        inputs += ["-i", str(p)]
++
++    vparts: list[str] = []
++    aparts: list[str] = []
++    prev_v = "[0:v]"
++    prev_a = "[0:a]"
++    cum = durations[0]
++    for i in range(1, n):
++        offset = max(0.0, cum - xfade_dur)
++        vout = f"[vx{i}]"
++        aout = f"[ax{i}]"
++        vparts.append(
++            f"{prev_v}[{i}:v]xfade=transition=fade:"
++            f"duration={xfade_dur:.3f}:offset={offset:.3f}{vout}"
++        )
++        aparts.append(f"{prev_a}[{i}:a]acrossfade=d={xfade_dur:.3f}{aout}")
++        prev_v, prev_a = vout, aout
++        cum = cum + durations[i] - xfade_dur
++
++    filter_complex = ";".join(vparts + aparts)
++    preset, crf = ("medium", "22") if preview else ("fast", "20")
++    cmd = [
++        "ffmpeg", "-y",
++        *inputs,
++        "-filter_complex", filter_complex,
++        "-map", prev_v, "-map", prev_a,
++        "-c:v", "libx264", "-preset", preset, "-crf", crf,
++        "-pix_fmt", "yuv420p", "-r", OUTPUT_FPS,
++        "-c:a", "aac", "-b:a", "192k", "-ar", "48000",
++        "-movflags", "+faststart",
++        str(out_path),
++    ]
++    print(f"xfade-concat ({xfade_dur*1000:.0f}ms) → {out_path.name}")
++    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
++
++
+ # -------- Master SRT (Rule 5) ------------------------------------------------
+ 
+ 
+@@ -499,6 +640,8 @@ def build_final_composite(
+     subtitles_path: Path | None,
+     out_path: Path,
+     edit_dir: Path,
++    force_style: str | None = None,
++    fontsdir: Path | None = None,
+ ) -> None:
+     """Final pass: base → overlays (PTS-shifted) → subtitles LAST → out.
+ 
+@@ -537,10 +680,19 @@ def build_final_composite(
+ 
+     # Subtitles LAST — Rule 1
+     if has_subs:
+-        subs_abs = str(subtitles_path.resolve()).replace(":", r"\:").replace("'", r"\'")
+-        filter_parts.append(
+-            f"{current}subtitles='{subs_abs}':force_style='{SUB_FORCE_STYLE}'[outv]"
+-        )
++        # On Windows, libass/ffmpeg filter parsing chokes on backslash path
++        # separators — normalize to forward slashes, then escape the drive colon.
++        def _esc_filter_path(p: Path) -> str:
++            s = str(p.resolve()).replace("\\", "/")
++            return s.replace(":", r"\:").replace("'", r"\'")
++        subs_abs = _esc_filter_path(subtitles_path)
++        style = force_style or SUB_FORCE_STYLE
++        sub_filter = f"{current}subtitles='{subs_abs}'"
++        if fontsdir is not None:
++            fonts_abs = _esc_filter_path(fontsdir)
++            sub_filter += f":fontsdir='{fonts_abs}'"
++        sub_filter += f":force_style='{style}'[outv]"
++        filter_parts.append(sub_filter)
+         out_label = "[outv]"
+     else:
+         # Rename the last overlay output to [outv] for consistency
+@@ -624,7 +776,13 @@ def main() -> None:
+     else:
+         base_name = "base.mp4"
+     base_path = edit_dir / base_name
+-    concat_segments(segment_paths, base_path, edit_dir)
++    xfade_dur = float(edl.get("crossfade_s") or 0.0)
++    if xfade_dur > 0 and len(segment_paths) > 1:
++        durations = [float(r["end"]) - float(r["start"]) for r in edl["ranges"]]
++        concat_segments_xfade(segment_paths, durations, base_path, xfade_dur,
++                              preview=args.preview)
++    else:
++        concat_segments(segment_paths, base_path, edit_dir)
+ 
+     # 3. Subtitles: build if requested, resolve final path
+     subs_path: Path | None = None
+@@ -640,13 +798,17 @@ def main() -> None:
+ 
+     # 4. Composite (overlays + subtitles LAST) → intermediate (pre-loudnorm) path
+     overlays = edl.get("overlays") or []
++    edl_style = edl.get("subtitle_style")
++    edl_fontsdir = resolve_path(edl["fontsdir"], edit_dir) if edl.get("fontsdir") else None
+     if args.no_loudnorm:
+         # Composite directly to final output
+-        build_final_composite(base_path, overlays, subs_path, out_path, edit_dir)
++        build_final_composite(base_path, overlays, subs_path, out_path, edit_dir,
++                              force_style=edl_style, fontsdir=edl_fontsdir)
+     else:
+         # Composite to a temp file, then run loudnorm → final output
+         tmp_composite = out_path.with_suffix(".prenorm.mp4")
+-        build_final_composite(base_path, overlays, subs_path, tmp_composite, edit_dir)
++        build_final_composite(base_path, overlays, subs_path, tmp_composite, edit_dir,
++                              force_style=edl_style, fontsdir=edl_fontsdir)
+         print("loudness normalization → social-ready (-14 LUFS / -1 dBTP / LRA 11)")
+         apply_loudnorm_two_pass(tmp_composite, out_path, preview=args.draft)
+         tmp_composite.unlink(missing_ok=True)

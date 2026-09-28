@@ -1,0 +1,75 @@
+/* faceless-kit — design system (navy data-viz). Reusável entre lotes. */
+@font-face{font-family:HL;src:url('fonts/ariblk.ttf')}
+@font-face{font-family:Inter;src:url('fonts/Inter-700-latin.woff2')}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#07131f}
+#root{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:Inter,Arial,sans-serif;color:#eaf3f6}
+.bg{position:absolute;inset:0;background:#07131f;background-image:radial-gradient(circle at 50% 34%,rgba(34,211,238,.14),transparent 52%),linear-gradient(rgba(75,139,166,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(75,139,166,.08) 1px,transparent 1px);background-size:auto,60px 60px,60px 60px}
+video.clip{position:absolute;inset:0;width:1080px;height:1920px;object-fit:cover}
+.grade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,19,31,.62),rgba(7,19,31,.72))}
+.scene{position:absolute;inset:0}.scene>*{position:absolute}
+/* cores de acento */
+.cy{color:#22d3ee}.gr{color:#34d399}.ye{color:#fbbf24}.co{color:#ff5c67}
+/* eyebrow + headline */
+.eb{left:70px;top:170px;padding:11px 24px;border:1px solid #22d3ee;border-radius:999px;color:#22d3ee;font:800 26px Inter;letter-spacing:5px;white-space:nowrap}
+.eb.gr{border-color:#34d399;color:#34d399}.eb.co{border-color:#ff5c67;color:#ff5c67}.eb.ye{border-color:#fbbf24;color:#fbbf24}
+.hl{left:70px;top:250px;width:960px;font:900 88px/0.98 HL;letter-spacing:.5px}
+/* badges (isoladas / conectadas) */
+.badge{width:340px;height:220px;border-radius:20px;background:#0e2233;border:1px solid rgba(120,160,185,.28);display:flex;align-items:center;justify-content:center}
+.badge .bt{font:900 56px HL;color:#8aa0ad}
+/* 2×2 alinhado e centrado */
+.b1{left:170px;top:720px}.b2{left:570px;top:720px}.b3{left:170px;top:980px}.b4{left:570px;top:980px}
+.linksvg{position:absolute;left:0;top:0;width:1080px;height:1920px;pointer-events:none}
+/* grid de certs + futuros + selo ∞ */
+.grid{left:120px;top:560px;width:840px;display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.grid .g{height:158px;border-radius:14px;background:#0e2233;border:1px solid rgba(120,160,185,.25);display:flex;align-items:center;justify-content:center;font:900 52px HL;color:#22d3ee}
+.futbar{left:120px;top:894px;width:840px;height:112px;border-radius:14px;border:2px dashed #34d399;display:flex;align-items:center;justify-content:center;font:900 40px HL;color:#34d399}
+.seal{left:50%;top:1052px;transform:translateX(-50%);width:360px;height:196px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(52,211,153,.10);border:2px solid #34d399;border-radius:20px}
+.seal .inf{font:900 120px HL;color:#34d399;line-height:.8}.seal .lb{font:800 26px Inter;letter-spacing:6px;color:#34d399}
+/* cost cards + contador */
+.cc{left:120px;width:840px;display:flex;align-items:center;justify-content:space-between;background:#0e2233;border:1px solid rgba(120,160,185,.22);border-radius:16px;padding:22px 30px}
+.cc .t{font:800 38px Inter;color:#cfe0e8}.cc .v{font:900 46px HL;color:#ff5c67}
+.cc1{top:560px}.cc2{top:700px}.cc3{top:840px}
+.total{left:120px;top:1010px;width:840px;display:flex;align-items:center;justify-content:space-between;padding:6px 8px}
+.total .k{font:800 34px Inter;letter-spacing:2px;color:#9fb6c4}.total .n{font:900 92px HL;color:#ff5c67}
+/* flatline (carreira parada) */
+.flchart{left:90px;top:600px;width:900px;height:640px}.flchart svg{width:900px;height:640px}
+.wall{left:735px;top:640px;width:150px;height:340px;background:linear-gradient(180deg,#ff5c67,#7a1f27);border-radius:10px}
+.stopx{left:690px;top:700px;font:900 120px HL;color:#ff5c67}
+/* stop + data (hook urgência) */
+.stopc{left:50%;top:840px;transform:translateX(-50%);width:200px;height:200px;border-radius:50%;background:rgba(255,92,103,.14);border:5px solid #ff5c67;display:flex;align-items:center;justify-content:center;font:900 120px HL;color:#ff5c67}
+.datebig{left:0;right:0;top:1090px;text-align:center;font:900 150px HL;color:#fbbf24;line-height:.8}.datebig span{font-size:80px}
+/* cta: datecard + live + botão */
+.datecard{left:120px;top:560px;width:840px;background:#0e2233;border:1px solid rgba(120,160,185,.25);border-left:8px solid #fbbf24;border-radius:18px;padding:34px 40px}
+.datecard .d{font:900 120px HL;color:#fbbf24;line-height:.9}.datecard .h{font:800 42px Inter;color:#eaf3f6;margin-top:10px}
+.live{left:120px;top:850px;display:flex;align-items:center;gap:18px;background:#ff5c67;border-radius:14px;padding:16px 30px}
+.live .pl{width:0;height:0;border-left:34px solid #fff;border-top:20px solid transparent;border-bottom:20px solid transparent}.live .lt{font:900 40px HL;color:#fff;letter-spacing:2px}
+.ctabtn{left:120px;top:1010px;width:840px;background:linear-gradient(135deg,#22d3ee,#0ea5c0);border-radius:18px;padding:30px;text-align:center;font:900 50px HL;color:#052027}
+/* lock (cert bloqueada) */
+.lock{left:50%;top:720px;transform:translateX(-50%);width:360px;height:360px;border-radius:26px;background:#0e2233;border:2px solid #ff5c67;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.lock .ic{font:900 150px HL;color:#ff5c67;line-height:.8}.lock .lb{font:800 30px Inter;letter-spacing:3px;color:#ff5c67}
+/* vaga (oportunidade) */
+.vaga{left:120px;top:640px;width:840px;background:#0e2233;border:1px solid rgba(120,160,185,.25);border-left:8px solid #34d399;border-radius:18px;padding:34px 40px}
+.vaga .role{font:900 66px HL;color:#34d399}.vaga .sub{font:800 34px Inter;color:#cfe0e8;margin-top:10px}.vaga .up{margin-top:8px;font:800 30px Inter;color:#8aa0ad}
+/* offer — card positivo (oferta/download), borda ciano/verde + selo */
+.offer{left:120px;top:600px;width:840px;background:#0e2233;border:1px solid rgba(34,211,238,.4);border-radius:20px;padding:40px 44px;text-align:center}
+.offer.gr{border-color:rgba(52,211,153,.45)}
+.offer .ot{font:900 76px HL;color:#22d3ee;line-height:1.0}.offer.gr .ot{color:#34d399}
+.offer .os{font:800 36px Inter;color:#cfe0e8;margin-top:12px}
+.offer .obadge{display:inline-block;margin-top:24px;padding:12px 30px;border-radius:999px;background:#22d3ee;color:#052027;font:900 34px HL;letter-spacing:1px}
+.offer.gr .obadge{background:#34d399}
+/* checklist — itens com check verde, revelados 1 a 1 */
+.checklist{left:130px;top:600px;width:820px;display:flex;flex-direction:column;gap:20px}
+.checklist .ck{display:flex;align-items:center;gap:22px;background:#0e2233;border:1px solid rgba(120,160,185,.22);border-radius:14px;padding:22px 28px}
+.checklist .ck .mk{flex:none;width:52px;height:52px;border-radius:50%;background:rgba(52,211,153,.16);border:2px solid #34d399;color:#34d399;display:flex;align-items:center;justify-content:center;font:900 32px HL}
+.checklist .ck .cx{font:800 40px Inter;color:#eaf3f6}
+/* lower-third (usado sobre b-roll) */
+.lt{left:70px;bottom:430px;width:900px}
+.lt .bar{width:120px;height:10px;border-radius:5px;background:#22d3ee;transform-origin:left}
+.lt .box{margin-top:14px;background:rgba(14,34,51,.82);border-left:6px solid #22d3ee;border-radius:0 16px 16px 0;padding:20px 30px}
+.lt .t{font:900 56px HL;letter-spacing:.5px}.lt.gr .bar{background:#34d399}.lt.gr .box{border-left-color:#34d399}.lt.co .bar{background:#ff5c67}.lt.co .box{border-left-color:#ff5c67}
+/* legenda pill (karaokê) — posição FIXA */
+#capwrap{position:absolute;left:0;right:0;bottom:200px;height:190px;display:flex;align-items:center;justify-content:center;z-index:9}
+.cue{position:absolute;left:56px;right:56px;bottom:0;display:flex;justify-content:center;opacity:0}
+.pill{max-width:960px;background:rgba(255,255,255,.85);border-radius:22px;padding:18px 32px;box-shadow:0 14px 34px rgba(0,0,0,.4)}
+.pill span{font:800 44px/1.15 Inter,Arial,sans-serif;color:#8a97a0}.pill span.on{color:#0e2a36}

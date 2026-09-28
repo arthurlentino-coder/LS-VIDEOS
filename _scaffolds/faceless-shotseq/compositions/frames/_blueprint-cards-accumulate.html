@@ -1,0 +1,48 @@
+<template>
+  <!-- BLUEPRINT: lista que ACUMULA (cards/itens entram 1 a 1, número conta). Bom p/ "soma de gastos",
+       checklist, provas, benefícios. Copiar p/ NN-nome.html. -->
+  <div id="root" data-composition-id="XX-cards" data-width="1080" data-height="1920">
+    <div id="bg" class="bg clip" data-start="0" data-duration="7.0" data-track-index="0"></div>
+    <div class="stage">
+      <div class="eyebrow">EYEBROW</div>
+      <div class="headline"><span class="cy">TÍTULO DA LISTA</span></div>
+      <div class="cards">
+        <div id="k1" class="ccard">ITEM UM<b>✓</b></div>
+        <div id="k2" class="ccard">ITEM DOIS<b>✓</b></div>
+        <div id="k3" class="ccard">ITEM TRÊS<b>✓</b></div>
+      </div>
+      <div id="total" class="total">TOTAL<b id="tval">0</b></div>
+    </div>
+  </div>
+  <style>
+    @font-face{font-family:HL;src:url('fonts/ariblk.ttf')}@font-face{font-family:Inter;src:url('fonts/Inter-700-latin.woff2')}
+    *{box-sizing:border-box}#root{position:relative;width:1080px;height:1920px;overflow:hidden;color:#f4f7f5;font-family:Inter,Arial,sans-serif}
+    .bg{position:absolute;inset:0;background-color:#07131f;background-image:radial-gradient(circle at 70% 30%,rgba(52,211,153,.14),transparent 34%),linear-gradient(rgba(75,139,166,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(75,139,166,.12) 1px,transparent 1px);background-size:auto,64px 64px,64px 64px;transform-origin:60% 40%}
+    .stage{position:absolute;inset:0;transform-origin:50% 44%}
+    .eyebrow{position:absolute;left:82px;top:150px;padding:12px 22px;border:1px solid #34d399;border-radius:999px;color:#34d399;font:700 26px Inter;letter-spacing:5px}
+    .headline{position:absolute;left:76px;top:236px;width:960px;font:900 84px/1.02 HL,Inter,sans-serif}.cy{color:#34d399}
+    .cards{position:absolute;left:90px;top:470px;width:900px}
+    .ccard{position:relative;height:132px;margin-bottom:24px;border-radius:22px;background:linear-gradient(155deg,#15384a,#0c2230);border:1px solid #2a4657;padding:34px 30px;font:700 40px Inter;color:#dfe9ee}
+    .ccard b{position:absolute;right:34px;top:40px;font:900 52px HL;color:#34d399}
+    .total{position:absolute;right:66px;bottom:520px;text-align:right;font:700 30px Inter;letter-spacing:2px;color:#7895a8}
+    .total b{display:block;margin-top:12px;font:900 84px HL;color:#fbbf24}
+  </style>
+  <script src="vendor/gsap.min.js"></script>
+  <script>
+    (function(){
+      const tl=gsap.timeline({paused:true});window.__timelines=window.__timelines||{};window.__timelines['XX-cards']=tl;
+      const D=7.0; // <-- casar com data-duration do frame no index
+      gsap.set('#k1,#k2,#k3',{opacity:0,x:-60});gsap.set('#total',{opacity:0});
+      tl.to('.stage',{scale:1.03,duration:D,ease:'none'},0);
+      tl.to('.bg',{scale:1.06,duration:D,ease:'none'},0);
+      tl.fromTo('.eyebrow',{opacity:.2,x:-30},{opacity:1,x:0,duration:.3},0);
+      tl.fromTo('.headline',{opacity:.25,y:20},{opacity:1,y:0,duration:.4,ease:'power3.out'},.15);
+      const tv={v:0};
+      function card(sel,at,to){tl.to(sel,{opacity:1,x:0,duration:.34,ease:'back.out(1.8)'},at);tl.to('#total',{opacity:1,duration:.3},at);tl.to(tv,{v:to,duration:.4,ease:'power1.out',onUpdate:function(){document.getElementById('tval').textContent=Math.round(tv.v)}},at+.1);}
+      card('#k1',1.2,1);
+      card('#k2',2.4,2);
+      card('#k3',3.6,3);
+      tl.to('.cards',{y:'-=6',duration:1.6,yoyo:true,repeat:Math.max(1,Math.round((D-4.2)/1.6)),ease:'sine.inOut'},4.2);
+    })();
+  </script>
+</template>

@@ -1,0 +1,40 @@
+<template>
+  <!-- BLUEPRINT: frame de B-ROLL. #root TRANSPARENTE — o <video class="clip"> vive no INDEX
+       (1º no DOM = camada de baixo) e aparece por trás. Aqui só grade+tint+vinheta + lower-third.
+       Usar nos beats de EMOÇÃO/pessoa (não nos de dado). Copiar p/ NN-nome.html. -->
+  <div id="root" data-composition-id="XX-broll" data-width="1080" data-height="1920">
+    <div class="grade"></div>
+    <div class="tint"></div>
+    <div class="vig"></div>
+    <div id="lt" class="lt">
+      <i id="fio" class="fio"></i>
+      <div class="ltk">KICKER</div>
+      <div class="lth"><span id="lh1">LINHA UM</span><br><span id="lh2" class="dg">DESTAQUE</span></div>
+    </div>
+  </div>
+  <style>
+    @font-face{font-family:HL;src:url('fonts/ariblk.ttf')}@font-face{font-family:Inter;src:url('fonts/Inter-700-latin.woff2')}
+    *{box-sizing:border-box}#root{position:relative;width:1080px;height:1920px;overflow:hidden;color:#f4f7f5;font-family:Inter,Arial,sans-serif;background:transparent}
+    .grade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,19,31,.12) 0%,rgba(7,19,31,.04) 34%,rgba(7,19,31,.5) 70%,rgba(7,19,31,.92) 100%)}
+    .tint{position:absolute;inset:0;background:rgba(9,34,48,.16);mix-blend-mode:multiply}
+    .vig{position:absolute;inset:0;box-shadow:inset 0 0 200px rgba(0,0,0,.4)}
+    .lt{position:absolute;left:88px;bottom:470px;width:900px}
+    .fio{position:absolute;left:0;top:6px;width:8px;height:190px;background:#22d3ee;border-radius:4px;transform-origin:top center}
+    .ltk{margin-left:38px;color:#8fdff0;font:700 30px Inter;letter-spacing:5px}
+    .lth{margin-left:38px;margin-top:14px;font:900 112px/1.0 HL;letter-spacing:1px}.dg{color:#22d3ee}
+  </style>
+  <script src="vendor/gsap.min.js"></script>
+  <script>
+    (function(){
+      const tl=gsap.timeline({paused:true});window.__timelines=window.__timelines||{};window.__timelines['XX-broll']=tl;
+      const D=6.9; // <-- casar com data-duration do frame E do <video> no index
+      gsap.set('#fio',{scaleY:0});gsap.set('.ltk',{opacity:0,x:-30});gsap.set('#lh1,#lh2',{opacity:0,y:40});
+      tl.to({},{duration:D},0);
+      tl.to('#fio',{scaleY:1,duration:.5,ease:'power2.out'},.3);
+      tl.to('.ltk',{opacity:1,x:0,duration:.4,ease:'power3.out'},.6);
+      tl.to('#lh1',{opacity:1,y:0,duration:.45,ease:'power3.out'},.9);
+      tl.to('#lh2',{opacity:1,y:0,duration:.45,ease:'back.out(1.6)'},1.3);
+      tl.to('#lh2',{scale:1.03,duration:1.3,yoyo:true,repeat:Math.max(1,Math.round((D-2)/1.3)),ease:'sine.inOut',transformOrigin:'left center'},2.0);
+    })();
+  </script>
+</template>

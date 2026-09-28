@@ -1,0 +1,326 @@
+<title>Padrões da Mesa de Corte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,700;0,900&family=Archivo+Black&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+  :root{
+    --ground:#f4f7f8; --surface:#ffffff; --surface-2:#eef3f5; --raised:#ffffff;
+    --border:rgba(14,34,51,.12); --border-strong:rgba(14,34,51,.22);
+    --ink:#0e2233; --ink-soft:#33475a; --muted:#5a6b78;
+    --cyan:#0c9bb5; --cyan-bright:#22d3ee; --green:#189e6f; --green-bright:#34d399;
+    --yellow:#c98a00; --coral:#e23c48; --coral-soft:rgba(226,60,72,.10);
+    --good-soft:rgba(24,158,111,.10); --shadow:0 1px 2px rgba(14,34,51,.06),0 12px 30px rgba(14,34,51,.08);
+    --pill:rgba(14,34,51,.05);
+  }
+  :root:not([data-theme="light"]){}
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0a1520; --surface:#0f1e2c; --surface-2:#132635; --raised:#15293a;
+      --border:rgba(120,160,185,.16); --border-strong:rgba(120,160,185,.30);
+      --ink:#eaf1f5; --ink-soft:#c3d2dc; --muted:#8ba3b4;
+      --cyan:#22d3ee; --cyan-bright:#22d3ee; --green:#34d399; --green-bright:#34d399;
+      --yellow:#fbbf24; --coral:#ff5c67; --coral-soft:rgba(255,92,103,.13);
+      --good-soft:rgba(52,211,153,.12); --shadow:0 1px 2px rgba(0,0,0,.4),0 18px 40px rgba(0,0,0,.35);
+      --pill:rgba(255,255,255,.06);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0a1520; --surface:#0f1e2c; --surface-2:#132635; --raised:#15293a;
+    --border:rgba(120,160,185,.16); --border-strong:rgba(120,160,185,.30);
+    --ink:#eaf1f5; --ink-soft:#c3d2dc; --muted:#8ba3b4;
+    --cyan:#22d3ee; --cyan-bright:#22d3ee; --green:#34d399; --green-bright:#34d399;
+    --yellow:#fbbf24; --coral:#ff5c67; --coral-soft:rgba(255,92,103,.13);
+    --good-soft:rgba(52,211,153,.12); --shadow:0 1px 2px rgba(0,0,0,.4),0 18px 40px rgba(0,0,0,.35);
+    --pill:rgba(255,255,255,.06);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:var(--ground); color:var(--ink);
+    font-family:Inter,system-ui,sans-serif; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 88% -4%,color-mix(in srgb,var(--cyan) 12%,transparent),transparent 40%);
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:clamp(28px,5vw,72px) clamp(18px,4vw,40px) 96px}
+  .eyebrow{font:700 12px/1 Inter;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan);display:inline-flex;align-items:center;gap:8px}
+  .eyebrow::before{content:"";width:22px;height:1.5px;background:var(--cyan)}
+
+  /* HERO */
+  header{border-bottom:1px solid var(--border);padding-bottom:36px;margin-bottom:12px}
+  h1{font-family:"Archivo Black",Archivo,sans-serif;font-weight:900;font-size:clamp(38px,7vw,72px);line-height:.94;letter-spacing:-.02em;text-wrap:balance;margin:20px 0 0}
+  h1 .cy{color:var(--cyan)}
+  .lede{font-size:clamp(16px,2.2vw,19px);color:var(--ink-soft);max-width:60ch;margin-top:22px}
+  .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+  .tag{font:600 12.5px Inter;padding:6px 13px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);color:var(--ink-soft)}
+  .tag b{color:var(--green);font-weight:700}
+
+  section{margin-top:56px}
+  h2{font-family:Archivo,sans-serif;font-weight:900;font-size:clamp(23px,3.4vw,30px);letter-spacing:-.01em;margin:14px 0 6px;text-wrap:balance}
+  .sec-note{color:var(--muted);max-width:62ch;margin-bottom:22px}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px 28px;box-shadow:var(--shadow)}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+  h3{font-family:Archivo,sans-serif;font-weight:700;font-size:18px;letter-spacing:.005em;display:flex;align-items:center;gap:10px}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .fmt-p{color:var(--ink-soft);font-size:15px;margin-top:10px}
+  .fmt-tag{display:inline-block;margin-top:14px;font:700 11px/1 "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:5px 9px}
+
+  /* permanent rules */
+  .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+  .rule{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--cyan);border-radius:12px;padding:22px 24px;box-shadow:var(--shadow)}
+  .rule .n{font-family:"Archivo Black",sans-serif;font-size:13px;color:var(--cyan);letter-spacing:.1em}
+  .rule h4{font-family:Archivo,sans-serif;font-size:19px;font-weight:900;margin:6px 0 8px}
+  .rule p{color:var(--ink-soft);font-size:15px}
+
+  /* erro -> padrão */
+  .swap{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:stretch;margin-top:14px;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  @media(max-width:560px){.swap{grid-template-columns:1fr;}.swap .arrow{transform:rotate(90deg);padding:4px 0}}
+  .swap>div{padding:18px 20px}
+  .bad{background:var(--coral-soft)}
+  .good{background:var(--good-soft)}
+  .swap .lbl{font:700 11px/1 "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:7px;margin-bottom:9px}
+  .bad .lbl{color:var(--coral)} .good .lbl{color:var(--green)}
+  .swap p{font-size:14.5px;color:var(--ink-soft)}
+  .arrow{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:20px;background:var(--surface-2)}
+
+  /* caption demo */
+  .capdemo{margin-top:16px;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:linear-gradient(120deg,#1a2b3a,#25506b);min-height:150px;display:flex;align-items:flex-end;justify-content:center;padding:22px}
+  .capbox{background:rgba(255,255,255,.82);border-radius:16px;padding:13px 22px;box-shadow:0 10px 26px rgba(0,0,0,.3);font:800 20px Inter;max-width:90%}
+  .capbox .on{color:#0e2a36}.capbox .off{color:#8a97a0}
+
+  /* timing table */
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;margin-top:8px}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:440px}
+  thead th{text-align:left;font:700 11px "JetBrains Mono",monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:13px 18px;background:var(--surface-2);border-bottom:1px solid var(--border)}
+  td{padding:12px 18px;border-bottom:1px solid var(--border);color:var(--ink-soft)}
+  tbody tr:last-child td{border-bottom:0}
+  td.t{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--yellow);font-variant-numeric:tabular-nums;white-space:nowrap}
+  td.w{font-family:"JetBrains Mono",monospace;color:var(--cyan)}
+  td.el{color:var(--ink);font-weight:600}
+
+  ul.clean{list-style:none;display:flex;flex-direction:column;gap:11px;margin-top:6px}
+  ul.clean li{position:relative;padding-left:26px;color:var(--ink-soft);font-size:15px}
+  ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:9px;height:9px;border-radius:2px;background:var(--cyan);transform:rotate(45deg)}
+  ul.clean li b{color:var(--ink)}
+
+  code{font-family:"JetBrains Mono",monospace;font-size:.88em;background:var(--pill);padding:2px 6px;border-radius:5px;color:var(--ink)}
+
+  .gotchas{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+  .got{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+  .got .h{font:700 13px "JetBrains Mono",monospace;color:var(--coral);margin-bottom:6px}
+  .got p{font-size:14px;color:var(--ink-soft)}
+
+  .flow{counter-reset:step;display:flex;flex-direction:column;gap:2px}
+  .flow .step{display:flex;gap:16px;padding:16px 0;border-bottom:1px dashed var(--border)}
+  .flow .step:last-child{border-bottom:0}
+  .flow .step::before{counter-increment:step;content:counter(step);font-family:"Archivo Black",sans-serif;font-size:15px;color:var(--ground);background:var(--cyan);min-width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:none}
+  .flow .step p{color:var(--ink-soft);font-size:15px}
+  .flow .step b{color:var(--ink)}
+
+  footer{margin-top:64px;padding-top:26px;border-top:1px solid var(--border);color:var(--muted);font-size:13.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">Mesa de Corte · padrões de produção</span>
+  <h1>O que o app carrega<br>pra <span class="cy">todo lote</span>.</h1>
+  <p class="lede">Ajustes validados no teste <b>C0266</b> — os 4 formatos, a legenda, a sincronia fala↔motion e a trilha. Isto é o que a Mesa de Corte precisa aplicar sozinha em cada lote, sem repetir correção.</p>
+  <div class="meta">
+    <span class="tag">Teste <b>C0266</b> · 1 vídeo · 4 formatos</span>
+    <span class="tag">Legenda <b>pill fixo</b></span>
+    <span class="tag">Motion <b>ancorado à fala</b></span>
+    <span class="tag">Trilha <b>com gate</b></span>
+  </div>
+</header>
+
+<section>
+  <span class="eyebrow">Inegociável</span>
+  <h2>Duas regras permanentes</h2>
+  <p class="sec-note">Valem para o faceless e para qualquer motion gráfico. Se uma delas falhar, o vídeo não sai.</p>
+  <div class="rules">
+    <div class="rule">
+      <div class="n">REGRA 01</div>
+      <h4>Motion sincronizado à fala</h4>
+      <p>Cada revelação entra na <b>palavra exata</b> em que o assunto é dito — não em beats aproximados. Segmenta o transcript por ideia e ancora cada elemento no timing da palavra.</p>
+    </div>
+    <div class="rule">
+      <div class="n">REGRA 02</div>
+      <h4>Cena nunca vazia</h4>
+      <p>Nenhum trecho fica só com fundo e texto parado. Todo momento tem um herói visual em movimento — gráfico, contador, selo, ícone — preenchendo a cena.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Entrega</span>
+  <h2>Os 4 formatos</h2>
+  <p class="sec-note">Todo lote sai nos quatro. Cada um tem um padrão próprio — abaixo, o que ficou definido depois das correções do C0266.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="dot" style="background:var(--cyan)"></span>Normal</h3>
+      <p class="fmt-p">Talking-head 9:16 reenquadrado (YuNet), legenda karaokê por cima. Base limpa — a estrela é a fala.</p>
+      <span class="fmt-tag">base + legenda</span>
+    </div>
+    <div class="card">
+      <h3><span class="dot" style="background:var(--green)"></span>Split</h3>
+      <p class="fmt-p">Rosto em cima, painel data-viz embaixo. <b>Muito motion, pouco texto</b> — herói animado por beat (anel, contador, barras, selo), headline curto de uma linha.</p>
+      <span class="fmt-tag">topo + painel animado</span>
+    </div>
+    <div class="card">
+      <h3><span class="dot" style="background:var(--yellow)"></span>Hybrid</h3>
+      <p class="fmt-p">Talking-head com <b>lower-third animado por beat</b> — barra cresce, card desliza, troca na fronteira de cada ideia. Nunca um card estático o vídeo todo.</p>
+      <span class="fmt-tag">lower-third + legenda</span>
+    </div>
+    <div class="card">
+      <h3><span class="dot" style="background:var(--coral)"></span>Faceless</h3>
+      <p class="fmt-p">Sem rosto. Sequência de cenas <b>data-viz que diagramam a ideia</b> (VS, fluxo, barras, selos). Hard-cut, legenda karaokê embaixo.</p>
+      <span class="fmt-tag">shot-sequence data-viz</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Correção nº 1</span>
+  <h2>Legenda: pill branco, posição fixa</h2>
+  <p class="sec-note">A legenda é a mesma em todos os formatos: caixa branca translúcida, <b>ancorada num ponto fixo</b>, com destaque palavra a palavra. Nunca muda de lugar conforme a fala.</p>
+  <div class="swap">
+    <div class="bad">
+      <div class="lbl">✕ Fora do padrão</div>
+      <p>Caixa escura, ou subindo e descendo dependendo do número de linhas da fala. A legenda "dança" na tela.</p>
+    </div>
+    <div class="arrow">→</div>
+    <div class="good">
+      <div class="lbl">✓ Padrão</div>
+      <p>Pill <code>rgba(255,255,255,.82)</code> fixo em <code>bottom:200px</code>. Palavra ativa escura, resto cinza. Posição travada o vídeo inteiro.</p>
+    </div>
+  </div>
+  <div class="capdemo">
+    <div class="capbox"><span class="on">CEA em vinte</span> <span class="off">dias, estão abertas.</span></div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Correção nº 2</span>
+  <h2>Faceless = diagrama da ideia</h2>
+  <p class="sec-note">O padrão do faceless não é texto gigante nem personagem Lottie flutuando com texto minúsculo. É <b>data-viz</b> que visualiza o conceito específico daquele trecho.</p>
+  <div class="card">
+    <ul class="clean">
+      <li><b>Sobrancelha (pill)</b> no topo à esquerda — o rótulo do trecho.</li>
+      <li><b>Headline de 2 linhas</b> no topo à esquerda — linha branca + linha na cor de destaque.</li>
+      <li><b>HERO = diagrama data-viz</b> no centro — formas coloridas e rotuladas que visualizam a ideia (cards VS, nós de fluxo, barras, selo). O diagrama evolui pra contar a história.</li>
+      <li><b>Legenda karaokê</b> embaixo — o mesmo pill branco fixo.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Correção nº 3 · o método</span>
+  <h2>Como sincronizar motion e fala</h2>
+  <p class="sec-note">O erro clássico é o beat do hook longo demais, empurrando a próxima revelação. A cura: tempo local = <code>tempo global − corte</code>, e cada elemento ancorado na palavra. Estes foram os pontos do C0266.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Entra em</th><th>Palavra falada</th><th>Elemento</th></tr></thead>
+      <tbody>
+        <tr><td class="t">0,48s</td><td class="w">"correndo"</td><td class="el">Hook + anel de urgência</td></tr>
+        <tr><td class="t">1,48s</td><td class="w">"inscrições"</td><td class="el">Headline INSCRIÇÕES ABERTAS</td></tr>
+        <tr><td class="t">5,96s</td><td class="w">"vinte"</td><td class="el">Contador 0→20</td></tr>
+        <tr><td class="t">7,34s</td><td class="w">"abertas"</td><td class="el">Pop verde em ABERTAS</td></tr>
+        <tr><td class="t">9,02s</td><td class="w">"onze turmas"</td><td class="el">Barras subindo</td></tr>
+        <tr><td class="t">10,28s</td><td class="w">"recordista"</td><td class="el">Headline RECORDISTA</td></tr>
+        <tr><td class="t">15,04s</td><td class="w">"especialista"</td><td class="el">Selo CEA·Anbima desenhando</td></tr>
+        <tr><td class="t">17,76s</td><td class="w">"clica"</td><td class="el">Entrada do CTA</td></tr>
+        <tr><td class="t">19,00s</td><td class="w">"WhatsApp"</td><td class="el">Ícone do WhatsApp + pulso</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Áudio</span>
+  <h2>Trilha + SFX, sempre com gate</h2>
+  <p class="sec-note">Camada de áudio sutil por baixo da fala. É padrão, <b>mas passa por validação de vibe</b>: se o tipo/tom do conteúdo não combina com a trilha, não anexa.</p>
+  <div class="card">
+    <ul class="clean">
+      <li><b>Gate primeiro:</b> confirmar que tipo + vibe combinam (sério/institucional ≠ trilha animada). Na dúvida, perguntar.</li>
+      <li><b>Bed:</b> pad sintetizado com voicings de 7ª/9ª + linha celeste esparsa. Corporativo calmo, sem muzak.</li>
+      <li><b>Ducking sidechain</b> sob a fala — a voz sempre manda.</li>
+      <li><b>2 whooshes</b> por vídeo, nas junções fortes das cenas.</li>
+      <li><b>Loudnorm −14 LUFS</b>, saída <code>_trilha.mp4</code> separada da versão limpa.</li>
+    </ul>
+  </div>
+  <div class="swap">
+    <div class="bad">
+      <div class="lbl">✕ Bug corrigido</div>
+      <p>O <code>afade</code> ficava depois do <code>amix</code> → fadeava o mix inteiro e <b>cortava o fim da fala</b> (o CTA nos últimos 2,6s).</p>
+    </div>
+    <div class="arrow">→</div>
+    <div class="good">
+      <div class="lbl">✓ Agora</div>
+      <p>O fade vai <b>só no bed</b>, antes de misturar com a voz. Fala preservada até a última palavra; o bed some suave.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Antes de cortar</span>
+  <h2>Seleção de takes</h2>
+  <p class="sec-note">Nem tudo que foge do roteiro é lixo. Antes de escolher as tomadas, separar o que é intenção do que é acidente.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="dot" style="background:var(--green)"></span>Mantém</h3>
+      <p class="fmt-p"><b>Historinha / esquete</b> — trecho proposital, encenado, que faz parte da mensagem. E toda tomada <b>olhando pra câmera</b>.</p>
+      <span class="fmt-tag" style="color:var(--green);border-color:color-mix(in srgb,var(--green) 40%,transparent)">entra no corte</span>
+    </div>
+    <div class="card">
+      <h3><span class="dot" style="background:var(--coral)"></span>Corta</h3>
+      <p class="fmt-p"><b>Erro / bastidor</b> — recomeço, treino de cabeça baixa, conversa solta, blooper. Descartar mesmo quando é fiel ao roteiro.</p>
+      <span class="fmt-tag" style="color:var(--coral);border-color:color-mix(in srgb,var(--coral) 40%,transparent)">fora do corte</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Tipo de lote</span>
+  <h2>Lote de montagem</h2>
+  <p class="sec-note">Alguns lotes não são "1 gravação → 1 vídeo". Os clipes são peças que se <b>combinam</b> (ex.: VITALICIO). O app tem a seção <b>Montagem</b> pra instruir ou escolher como montar.</p>
+  <div class="card">
+    <ul class="clean">
+      <li><b>Combinatório</b> — papéis (gancho × corpo × CTA) geram todas as combinações. Ex.: 6 × 3 × 3 = 54 combos.</li>
+      <li><b>Na ordem do roteiro</b> — montar seguindo uma sequência/roteiro fixo.</li>
+      <li><b>Só instruir</b> — descrição livre de como montar.</li>
+      <li>O <b>nº do arquivo ≠ ordem do roteiro</b> — mapear cada clipe pelo conteúdo (transcrição), não pelo nome.</li>
+    </ul>
+  </div>
+  <p class="sec-note" style="margin-top:18px">O app tem também a seção <b>Roteiro</b>: quando existe, o usuário cola o texto ou anexa o arquivo. Serve pra mapear clipe→conteúdo, montar na ordem e conferir fidelidade. Vai no pedido em <code>roteiro:{texto,arquivo}</code> — texto colado ou de arquivo <code>.txt/.md/.csv/.json</code> viaja junto; um <code>.pdf/.docx</code> é anexado pelo nome e deve ser posto na pasta do lote.</p>
+</section>
+
+<section>
+  <span class="eyebrow">Não tropeçar de novo</span>
+  <h2>Gotchas técnicos do pipeline</h2>
+  <div class="gotchas">
+    <div class="got"><div class="h">overlay com alpha</div><p>Legenda/overlay tem que ser <code>.mov</code> ProRes (yuva) — o webm sai sem alpha e cobre o vídeo todo.</p></div>
+    <div class="got"><div class="h">ASS \kf</div><p>Karaokê em ASS precisa vir de arquivo <code>.mjs</code> — heredoc do bash come as barras invertidas.</p></div>
+    <div class="got"><div class="h">trilha.py no Windows</div><p>Rodar com <code>PYTHONIOENCODING=utf-8</code> e <code>py</code> — a seta no print quebra no charmap.</p></div>
+    <div class="got"><div class="h">Scribe comprime o fim</div><p>As últimas palavras empilham no mesmo instante; medir o fim real (silencedetect) e corrigir os tempos.</p></div>
+    <div class="got"><div class="h">legenda x rosto</div><p>A caixa nunca cobre o rosto — medir com YuNet e rebaixar em planos de close/contra-plongée.</p></div>
+    <div class="got"><div class="h">GSAP em &lt;g&gt; SVG</div><p>Não animar <code>x/y</code> em <code>&lt;g&gt;</code> aninhado; usar <code>svgOrigin</code>, ou envolver em <code>&lt;div&gt;</code>.</p></div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">Fluxo</span>
+  <h2>Como o lote roda</h2>
+  <div class="card">
+    <div class="flow">
+      <div class="step"><p><b>Perguntar os formatos</b> no início de cada lote novo — quais dos 4 entram.</p></div>
+      <div class="step"><p><b>Um vídeo por vez, com aprovação.</b> Produz, mostra, ajusta, aprova — só então o próximo.</p></div>
+      <div class="step"><p><b>Detectar a bruta:</b> cor (SDR/HLG→tonemap), orientação (transpose), reenquadre 9:16.</p></div>
+      <div class="step"><p><b>Entrega dupla:</b> cada formato sai limpo (<code>_REVIEW</code>) e com trilha (<code>_trilha</code>), depois do gate.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>Padrões da Mesa de Corte · consolidado no teste C0266</span>
+  <span>26 ago 2026</span>
+</footer>
+</div>

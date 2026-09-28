@@ -1,0 +1,60 @@
+<template>
+  <!-- BLUEPRINT VISUAL-FIRST: personagem LOTTIE é o PROTAGONISTA + headline pequeno de apoio.
+       ⚠️ Lottie SVG NÃO sobrevive ao capture do hyperframes → usar CANVAS PRÉ-RENDERIZADO (abaixo).
+       Lotties (assets/lottie/): runner(__runnerData) climbstairs(__climbStairsData) graduation(__graduationData)
+       exam(__examData) manworking(__manWorkingData) chat(__chatData) badge(__badgeData) click(__clickData) wave(__waveData).
+       Trocar o <script src> + a var DATA conforme o beat. -->
+  <div id="root" data-composition-id="XX-lottie" data-width="1080" data-height="1920">
+    <div id="bg" class="bg clip" data-start="0" data-duration="5.0" data-track-index="0"></div>
+    <div class="eyebrow" id="eyebrow">EYEBROW</div>
+    <div class="headline" id="hl"><span id="h1">APOIO CURTO</span> <span id="h2" class="cy">DESTAQUE</span></div>
+    <div id="lotwrap" class="lot"><canvas id="lotc" width="660" height="660"></canvas></div>
+    <div id="chip" class="chip"><b id="chk">✓</b><span>RÓTULO</span></div>
+  </div>
+  <style>
+    @font-face{font-family:HL;src:url('fonts/ariblk.ttf')}@font-face{font-family:Inter;src:url('fonts/Inter-700-latin.woff2')}
+    *{box-sizing:border-box}#root{position:relative;width:1080px;height:1920px;overflow:hidden;color:#f4f7f5;font-family:Inter,Arial,sans-serif}
+    .bg{position:absolute;inset:0;background-color:#07131f;background-image:radial-gradient(circle at 58% 50%,rgba(34,211,238,.16),transparent 40%),linear-gradient(rgba(75,139,166,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(75,139,166,.10) 1px,transparent 1px);background-size:auto,64px 64px,64px 64px}
+    .eyebrow{position:absolute;left:82px;top:150px;padding:12px 22px;border:1px solid #22d3ee;border-radius:999px;color:#22d3ee;font:700 27px Inter;letter-spacing:5px}
+    /* headline PEQUENO de apoio (78–94px, canto) — o VISUAL manda, NÃO o texto */
+    .headline{position:absolute;left:82px;top:236px;width:930px;font:900 82px/1.02 HL,Inter,sans-serif;letter-spacing:1px}.cy{color:#22d3ee}
+    .lot{position:absolute;left:50%;top:600px;width:660px;height:660px;margin-left:-330px;filter:drop-shadow(0 22px 45px rgba(0,0,0,.45))}
+    .lot canvas{width:660px;height:660px}
+    .chip{position:absolute;left:50%;top:1360px;transform:translateX(-50%);display:flex;align-items:center;gap:18px;padding:16px 32px;border-radius:999px;background:linear-gradient(155deg,#15384a,#0c2230);border:1px solid #2a4657;font:800 42px Inter;color:#eaf2f6;white-space:nowrap}
+    .chip b{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:#34d399;color:#07131f;font:900 36px HL}
+  </style>
+  <script src="vendor/gsap.min.js"></script>
+  <script src="vendor/lottie.min.js"></script>
+  <script src="assets/lottie/climbstairs-data.js"></script>
+  <script>
+    (function(){
+      const tl=gsap.timeline({paused:true});window.__timelines=window.__timelines||{};window.__timelines['XX-lottie']=tl;
+      const D=5.0;
+      const DATA=window.__climbStairsData; // <- trocar conforme o beat
+      // ---- Lottie via CANVAS pré-renderizado (sobrevive ao capture; SVG puro NÃO) ----
+      const ctx=document.getElementById('lotc').getContext('2d'); let FR=[]; const FPS=(DATA&&DATA.fr)||30;
+      // velocidade NATURAL em loop (NÃO esticar o clip p/ durar a cena toda = câmera lenta!)
+      function draw(f){ if(!FR.length)return; const i=Math.floor(f*D*FPS)%FR.length; ctx.clearRect(0,0,660,660); ctx.drawImage(FR[i],0,0); }
+      async function preload(data,w,h){ const hid=document.createElement('div'); hid.style.cssText='position:absolute;left:-9999px;top:-9999px;width:'+w+'px;height:'+h+'px'; document.body.appendChild(hid);
+        const a=lottie.loadAnimation({container:hid,renderer:'svg',loop:false,autoplay:false,animationData:data});
+        await new Promise(function(r){ if(a.isLoaded)r(); else a.addEventListener('DOMLoaded',r); });
+        const svg=hid.querySelector('svg'),out=[]; for(let i=0;i<a.totalFrames;i++){ a.goToAndStop(i,true);
+          const xml=new XMLSerializer().serializeToString(svg); const url='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(xml)));
+          const img=new Image(); await new Promise(function(rs,rj){img.onload=rs;img.onerror=rj;img.src=url;});
+          const c=document.createElement('canvas'); c.width=w;c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); out.push(c); }
+        hid.remove(); return out; }
+      // IMPORTANTE: registrar a promise em window.__ready p/ o hyperframes ESPERAR o preload antes de capturar
+      window.__ready=(window.__ready||[]).concat(preload(DATA,660,660).then(function(f){FR=f;draw(0);}));
+
+      const play={f:0};
+      tl.to(play,{f:1,duration:D,ease:'none',onUpdate:function(){draw(play.f);}},0); // Lottie roda a cena inteira
+      gsap.set('#lotwrap',{opacity:0,scale:.82,transformOrigin:'50% 60%'});gsap.set('#eyebrow',{opacity:0,x:-30});gsap.set('#h1',{opacity:0,y:18});gsap.set('#h2',{opacity:0,scale:.7,transformOrigin:'0% 50%'});gsap.set('#chip',{opacity:0,y:24});gsap.set('#chk',{scale:0,transformOrigin:'50% 50%'});
+      tl.to('#lotwrap',{opacity:1,scale:1,duration:.5,ease:'back.out(1.4)'},.1);   // VISUAL entra primeiro (protagonista)
+      tl.to('#eyebrow',{opacity:1,x:0,duration:.35,ease:'power3.out'},.35);
+      tl.to('#h1',{opacity:1,y:0,duration:.35,ease:'power3.out'},.6);            // headline apoio (casar T na palavra)
+      tl.to('#h2',{opacity:1,scale:1,duration:.4,ease:'back.out(2.2)'},1.2);
+      tl.to('#chip',{opacity:1,y:0,duration:.4,ease:'back.out(1.8)'},1.6);
+      tl.to('#chk',{scale:1,duration:.35,ease:'back.out(2.4)'},1.9);
+    })();
+  </script>
+</template>

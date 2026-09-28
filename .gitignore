@@ -1,20 +1,43 @@
-# Repositório versiona SÓ as bibliotecas reusáveis + brand.
-# Todo o resto (mídia bruta, saídas, projetos, masters) fica fora do git.
+# Repositório versiona o PROCESSO (docs, app, scripts, kits, bibliotecas) — o que precisa
+# para reproduzir o pipeline em outra máquina. Mídia bruta, projetos, saídas e masters ficam fora.
+# Os helpers do video-use vivem fora deste repo; o que mudamos neles está em
+# _scaffolds/pipeline-kit/video-use/ (ver README de lá).
 
 # 1) ignora tudo na raiz
 /*
 
 # 2) reabre só o que interessa
 !/.gitignore
+!/README.md
+!/prompts/
+!/scripts/
 !/_scaffolds/
+!/_codex/
+!/apps/
+!/.claude/
 
-# 3) dentro de _scaffolds, ignora tudo menos as libs escolhidas
-/_scaffolds/*
-!/_scaffolds/anim-library/
-!/_scaffolds/broll-pool/
-!/_scaffolds/brand/
+# 3) _codex: só o sistema executável (sem pydeps/pacotes/análises)
+/_codex/*
+!/_codex/video-system/
 
-# 4) artefatos de build/render regeneráveis dentro das libs
+# 4) apps: só a Mesa de Corte (as outras têm repositório próprio)
+/apps/*
+!/apps/mesa-de-corte/
+/apps/mesa-de-corte/orders/
+
+# 5) .claude: só o launch.json (settings.local.json é da máquina)
+/.claude/*
+!/.claude/launch.json
+
+# 6) _scaffolds: tudo, menos o vídeo de exemplo do split-kit (54 MB; usar o top.mp4 do projeto)
+/_scaffolds/split-kit/top.mp4
+
+# 7) artefatos de build/render/cache
 /_scaffolds/broll-pool/_compositions/*/renders/
 **/.hf-segments/
 **/.debug/
+**/__pycache__/
+**/node_modules/
+*.pyc
+.env
+.env.*

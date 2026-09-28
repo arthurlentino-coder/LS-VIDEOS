@@ -1,0 +1,100 @@
+<!doctype html>
+<!-- ===== TEMPLATE faceless-editorial. Copiar esta pasta public/ pro projeto e editar SÓ:
+     (1) data-duration do #stage, (2) as <video> de b-roll, (3) as <section> cenas,
+     (4) o <script> final (personagens + chamadas de timeline). O framework.css/js NÃO muda.
+     Cenas de exemplo abaixo: 1 personagem, 1 ilustração SVG, 1 b-roll, 1 CTA. ===== -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="framework.css">
+</head>
+<body>
+<div id="stage" data-composition-id="faceless" data-start="0" data-duration="12" data-fps="30" data-width="1080" data-height="1920">
+
+  <!-- TRACK 1: b-roll (um <video> por cena de footage; track-index 1) -->
+  <video class="bvid clip" id="v3" src="assets/EXEMPLO.mp4" muted playsinline data-start="7" data-duration="2.5" data-track-index="1"></video>
+
+  <!-- CENA MOTION com PERSONAGEM (canvas). Paleta = classe .pal-* -->
+  <section class="scene clip pal-warm" id="s1" data-start="0" data-duration="3.5" data-track-index="2">
+    <div class="atmo"></div><div class="grid"></div><div class="grain"></div><div class="vig"></div>
+    <div class="wrap"><div class="art"><div class="disc"></div>
+      <canvas class="character" id="c-grad" width="440" height="440"></canvas>
+      <div class="badge b1"><i></i>BADGE 1</div><div class="badge b2"><i></i>BADGE 2</div><div class="badge b3"><i></i>BADGE 3</div>
+      <div class="spark sp1"></div><div class="spark sp2"></div><div class="spark sp3"></div></div>
+      <div class="copy"><div class="kick">Kicker</div><div class="headline">HEADLINE <b>ACENTO</b></div><div class="sub">Subtítulo curto.</div></div>
+    </div>
+  </section>
+
+  <!-- CENA MOTION com ILUSTRAÇÃO SVG AUTORAL (viewBox 0 0 400 400; centro do disco = 200,200).
+       NUNCA anime x/y num <g transform="translate()"> — use coordenadas absolutas! -->
+  <section class="scene clip pal-mint" id="s2" data-start="3.5" data-duration="3.5" data-track-index="2">
+    <div class="atmo"></div><div class="grid"></div><div class="grain"></div><div class="vig"></div>
+    <div class="wrap"><div class="art"><div class="disc"></div>
+      <svg class="artsvg" viewBox="0 0 400 400">
+        <line class="ink" x1="46" y1="300" x2="354" y2="300" stroke-width="8" stroke-linecap="round"/>
+        <rect id="ex-bar" class="ink" x="160" y="150" width="80" height="150" rx="12" fill="var(--a)" stroke-width="7"/>
+      </svg>
+      <div class="badge b1"><i></i>BADGE 1</div><div class="badge b2"><i></i>BADGE 2</div><div class="badge b3"><i></i>BADGE 3</div>
+      <div class="spark sp1"></div><div class="spark sp2"></div><div class="spark sp3"></div></div>
+      <div class="copy"><div class="kick">Kicker</div><div class="headline">CONCEITO <b>SVG</b></div></div>
+    </div>
+  </section>
+
+  <!-- CENA DE B-ROLL (o <video> id=v3 acima cobre este intervalo) -->
+  <section class="bscene clip pal-cyan" id="s3" data-start="7" data-duration="2.5" data-track-index="2">
+    <div class="bgrade"></div>
+    <div class="bcopy"><div class="kick">Kicker</div><div class="headline">FRASE DO <b>B-ROLL</b></div><div class="sub">Subtítulo curto.</div></div>
+  </section>
+
+  <!-- CTA (card + cursor + ring; ids <id>-card/-cursor/-ring para o HF.cta) -->
+  <section class="scene clip pal-azure" id="s4" data-start="9.5" data-duration="2.5" data-track-index="2">
+    <div class="atmo"></div><div class="grid"></div><div class="grain"></div><div class="vig"></div>
+    <div class="wrap"><div class="art"><div class="disc"></div>
+      <div class="ctacard" id="s4-card"><small>COMECE AGORA</small><strong>QUERO</strong></div>
+      <div class="cring" id="s4-ring"></div>
+      <svg class="cursor" id="s4-cursor" viewBox="0 0 60 72"><path d="M6 4 50 52l-23 1-10 15z" fill="var(--cream)" stroke="var(--ink)" stroke-width="5"/></svg>
+      <div class="spark sp1"></div><div class="spark sp2"></div></div>
+      <div class="copy"><div class="kick">Comece agora</div><div class="headline">CLICA <b>AQUI</b></div></div>
+    </div>
+  </section>
+
+</div>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/lottie.min.js"></script>
+<script src="framework.js"></script>
+<!-- carregue SÓ os personagens que usar: -->
+<script src="assets/graduation-data.js"></script>
+<script>
+(async function () {
+  const { frames, player, wordSplit, timeline, enter, benter, idle, charLoop, cta } = window.HF;
+
+  // 1) preload dos personagens usados
+  const grad = player(await frames(window.__graduationData, 440, 440, 90), 30, "c-grad", 440, 440);
+
+  // 2) split das headlines em palavras
+  wordSplit();
+
+  // 3) timeline
+  const { tl, q } = timeline();
+
+  // 4) entradas: motion via enter(), b-roll via benter()
+  [["#s1", 0], ["#s2", 3.5]].forEach(v => enter(tl, q, v[0], v[1]));
+  benter(tl, q, "#s3", 7);
+  cta(tl, q, "#s4", 9.5);
+
+  // 5) idle (uma linha por cena de motion): [id, start, end]
+  [["#s1", 0, 3.5], ["#s2", 3.5, 7], ["#s4", 9.5, 12]].forEach(v => idle(tl, q, v[0], v[1], v[2]));
+
+  // 6) loop dos personagens: charLoop(tl, player, start, end)
+  charLoop(tl, grad, 0, 3.5);
+
+  // 7) animações internas das ilustrações SVG (custom por cena):
+  tl.fromTo("#ex-bar", { scaleY: 0, svgOrigin: "200 300" }, { scaleY: 1, duration: .5, ease: "back.out(1.8)" }, 3.9);
+
+  window.__timelines = window.__timelines || {};
+  window.__timelines.faceless = tl;
+})();
+</script>
+</body>
+</html>

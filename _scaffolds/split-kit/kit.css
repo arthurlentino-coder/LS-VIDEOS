@@ -1,0 +1,35 @@
+/* split-kit — sistema editorial de split (padrão MARE). Design system só.
+   Motion/engine em kit.js. Ilustrações em illos.js. */
+@font-face{font-family:Inter;src:url("fonts/Inter-400-latin.woff2")}
+@font-face{font-family:Inter;src:url("fonts/Inter-700-latin.woff2");font-weight:700}
+@font-face{font-family:Black;src:url("fonts/ariblk.ttf");font-weight:900}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#06101a;font-family:Inter,sans-serif}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:#06101a}
+#top{position:absolute;left:0;top:0;width:1080px;height:960px;overflow:hidden;background:#000}#top video{width:100%;height:100%;object-fit:cover}
+#bottom{position:absolute;left:0;top:960px;width:1080px;height:960px;overflow:hidden;background:#07131f}
+.scene{position:absolute;inset:0;padding:44px 56px 34px;overflow:hidden;color:#f4f7f5;background:#07131f}
+.atmo{position:absolute;inset:0;background:radial-gradient(circle at 76% 30%,var(--halo),transparent 44%),radial-gradient(circle at 12% 88%,#12283b,transparent 40%)}
+.grid{position:absolute;inset:0;opacity:.10;background-image:linear-gradient(#7189a0 1.5px,transparent 1.5px),linear-gradient(90deg,#7189a0 1.5px,transparent 1.5px);background-size:70px 70px}
+.grain{position:absolute;inset:0;opacity:.10;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.36'/%3E%3C/svg%3E")}
+.layout{position:absolute;left:56px;right:56px;top:150px;bottom:34px;display:grid;grid-template-columns:500px 1fr;grid-template-rows:520px auto;column-gap:26px}
+.scene.reverse .layout{grid-template-columns:1fr 500px}
+.scene.reverse .art{grid-column:2;grid-row:1}
+.scene.reverse .copy{grid-column:1;grid-row:1;text-align:right;justify-self:end;padding-right:6px}
+.scene.reverse .sub{margin-left:auto}.scene.reverse .statline{justify-content:flex-end}
+.scene.stack .layout{top:96px;grid-template-columns:1fr;grid-template-rows:430px 300px;justify-items:center}
+.scene.stack .art{grid-column:1;grid-row:1;zoom:.82}
+.scene.stack .copy{grid-column:1;grid-row:2;text-align:center;align-self:start}
+.scene.stack .headline{max-width:920px;font-size:60px}.scene.stack .sub{max-width:760px;margin-left:auto;margin-right:auto}.scene.stack .statline{justify-content:center}
+.art{position:relative;width:500px;height:500px;align-self:center;transform-origin:50% 50%;filter:drop-shadow(0 22px 24px #0009)}
+.disc{position:absolute;left:34px;top:28px;width:432px;height:432px;border-radius:50%;background:radial-gradient(circle at 50% 34%,#123047,#0b1d2b 72%);border:3px solid #29455b;box-shadow:inset 0 0 0 16px #0a1a26,0 18px 42px #0009}
+.disc:after{content:"";position:absolute;left:70px;right:70px;bottom:30px;height:15px;border-radius:50%;background:#02080d;filter:blur(10px);opacity:.8}
+.ill{position:absolute;left:34px;top:28px;width:432px;height:432px}
+.illf{display:flex;align-items:center;justify-content:center}
+.copy{position:relative;align-self:center;z-index:3}
+.kick{font-size:21px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:var(--a);margin-bottom:18px}
+.headline{font-family:Black,Inter,sans-serif;font-size:56px;line-height:.97;letter-spacing:-2px;text-transform:uppercase;max-width:470px}.headline b{color:var(--a)}.word{display:inline-block}
+.sub{font-size:25px;line-height:1.3;color:#bccadb;margin-top:20px;max-width:440px}
+.statline{display:flex;gap:8px;align-items:center;margin-top:22px}.statline span{height:7px;background:#29455b;border-radius:9px}.statline span:nth-child(1){width:74px;background:var(--a)}.statline span:nth-child(2){width:44px}.statline span:nth-child(3){width:20px}
+.footer{position:absolute;left:58px;right:58px;bottom:26px;height:4px;background:#183043}.footer i{display:block;width:24%;height:100%;background:var(--a);transform-origin:left}
+.spark{position:absolute;width:9px;height:9px;border:2px solid var(--a);transform:rotate(45deg);opacity:0}.sp1{left:44px;top:326px}.sp2{right:52px;top:150px}.sp3{right:430px;bottom:88px}
+text{font-family:Inter,sans-serif}

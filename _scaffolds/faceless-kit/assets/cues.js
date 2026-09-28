@@ -1,0 +1,1 @@
+window.__cues=[{s:0.3,e:2.2,words:[{tx:'Certificação',t:0.3},{tx:'isolada',t:1.2}]},{s:3.6,e:5.6,words:[{tx:'acesso',t:3.6},{tx:'vitalício',t:4.4}]}];

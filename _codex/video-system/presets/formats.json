@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "canvas": { "width": 1080, "height": 1920 },
+  "formats": {
+    "talking-head": {
+      "graphicsAllowed": false,
+      "captionZone": { "name": "lower-third", "yMin": 1450, "yMax": 1740 },
+      "rules": ["clean", "cuts-and-transitions-only", "sparse-sfx"]
+    },
+    "split": {
+      "graphicsAllowed": true,
+      "captionZone": { "name": "divider", "yMin": 900, "yMax": 1040 },
+      "presenterZone": { "x": 0, "y": 0, "width": 1080, "height": 960 },
+      "motionZone": { "x": 0, "y": 960, "width": 1080, "height": 960 },
+      "rules": ["caption-on-divider", "no-header", "motion-always-alive"]
+    },
+    "hybrid": {
+      "graphicsAllowed": true,
+      "captionZone": { "name": "above-card", "yMin": 1120, "yMax": 1320 },
+      "cardZone": { "x": 120, "y": 1360, "width": 840, "height": 400 },
+      "rules": ["compact-card", "no-yellow-strip", "art-contained", "protect-face-and-arms"]
+    },
+    "faceless": {
+      "graphicsAllowed": true,
+      "captionZone": { "name": "safe-base", "yMin": 1580, "yMax": 1770 },
+      "contentZone": { "x": 70, "y": 100, "width": 940, "height": 1430 },
+      "rules": ["editorial-montage", "broll-variation", "full-frame-occupancy", "motion-always-alive"]
+    }
+  }
+}
+

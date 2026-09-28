@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box}
+      html,body{width:1080px;height:1920px;overflow:hidden;background:#07131f}
+      #root{position:relative;width:1080px;height:1920px;overflow:hidden;background:#07131f}
+      .scene{position:absolute;inset:0;width:100%;height:100%}
+    </style>
+  </head>
+  <body>
+    <!--
+      FACELESS — shot-sequence (padrão §7.6.1, ref projects/VITALICIO/_map/edit/hf/faceless).
+      REGRAS DE OURO (não quebrar):
+        • 1 frame a cada ~5–7s → um vídeo de 33s tem ~5–7 frames, de 68s ~9.
+        • Cada frame = <template> em compositions/frames/NN-nome.html, timeline própria.
+        • DENTRO de cada frame: push-in lento do .stage + parallax do .bg pela DURAÇÃO INTEIRA
+          (nada congela); reveals semânticos na palavra; idle float/wobble no fim.
+        • B-ROLL: <video class="clip"> AQUI no index (1º no DOM = camada de baixo); o frame
+          correspondente é overlay TRANSPARENTE (grade+tint+vinheta+lower-third).
+        • Legenda: sempre compositions/captions.html (karaokê embutido, lê assets/cues.js).
+        • Ordem de pintura = ordem no DOM: áudio → b-rolls → frames → captions POR ÚLTIMO.
+      data-duration do #root = duração do áudio. Ajuste cada data-start/duration aos beats.
+    -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="{{DURATION}}" data-width="1080" data-height="1920" data-fps="30">
+
+      <!-- ÁUDIO (narração) -->
+      <audio id="vo" class="clip" src="assets/audio.m4a" data-start="0" data-duration="{{DURATION}}" data-track-index="10" data-volume="1"></audio>
+
+      <!-- B-ROLL (opcional; só se motion+b-roll). track-index alto, 1º no DOM entre visuais.
+           OBRIGATÓRIO id no <video> (senão o render CONGELA o clipe). -->
+      <!-- <video id="broll-1" class="clip" src="assets/broll-1.mp4" data-start="13.5" data-duration="6.9" data-track-index="5" muted></video> -->
+
+      <!-- FRAMES (shot-sequence) — duplicar a linha por frame, casando start/duration aos beats -->
+      <div class="scene" data-composition-id="01-hook"  data-composition-src="compositions/frames/01-hook.html"  data-start="0"    data-duration="6.0" data-track-index="0"></div>
+      <!-- <div class="scene" data-composition-id="02-..." data-composition-src="compositions/frames/02-....html" data-start="6.0" data-duration="6.0" data-track-index="1"></div> -->
+
+      <!-- LEGENDA — sempre por último (camada de cima) -->
+      <div class="scene" data-composition-id="captions" data-composition-src="compositions/captions.html" data-start="0" data-duration="{{DURATION}}" data-track-index="2"></div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+      window.__timelines["main"].to({}, { duration: {{DURATION}} }, 0);
+    </script>
+  </body>
+</html>

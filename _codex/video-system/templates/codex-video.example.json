@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "project": "EXEMPLO",
+  "format": "split",
+  "canvas": { "width": 1080, "height": 1920, "fps": 25 },
+  "source": {
+    "video": "input.mp4",
+    "edl": "edl.json",
+    "transcript": "transcripts/input.json",
+    "wordTimed": true
+  },
+  "captions": {
+    "mappedThroughEdl": true,
+    "maxWords": 6,
+    "maxDuration": 2.2,
+    "position": "divider"
+  },
+  "rhythm": {
+    "pattern": "fast-fast-hold-build-cta",
+    "peakBeat": "turn",
+    "visualChangeMaxSeconds": 5
+  },
+  "scenes": [
+    {
+      "id": "hook",
+      "start": 0,
+      "duration": 3.5,
+      "intent": "urgency",
+      "concept": "A janela de oportunidade se fecha diante do espectador.",
+      "mood": "Editorial, direto e institucional.",
+      "components": ["alert", "progress"],
+      "motionVerbs": ["stamps", "fills", "breathes"],
+      "transition": "hard-cut",
+      "occupancy": 0.72,
+      "ambientMotion": true,
+      "artContained": true,
+      "protectsPresenter": true
+    },
+    {
+      "id": "turn",
+      "start": 3.5,
+      "duration": 4.5,
+      "intent": "certification",
+      "concept": "O caminho deixa de parecer abstrato e vira uma sequência alcançável.",
+      "mood": "Preciso, progressivo e confiante.",
+      "components": ["timeline", "checklist"],
+      "motionVerbs": ["draws", "locks-in", "pulses"],
+      "transition": "velocity-push",
+      "occupancy": 0.76,
+      "ambientMotion": true,
+      "artContained": true,
+      "protectsPresenter": true
+    }
+  ],
+  "faceless": {
+    "brollUsed": false,
+    "montageTypes": []
+  },
+  "hybrid": {
+    "yellowStrip": false,
+    "cardInsideSafeZone": true
+  },
+  "output": "output/EXEMPLO_split_V1_REVIEW.mp4"
+}
+

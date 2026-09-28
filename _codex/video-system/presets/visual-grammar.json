@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "families": {
+    "certification": {
+      "concepts": ["document", "exam-path", "approval", "calendar", "progress"],
+      "components": ["timeline", "checklist", "progress", "metric"],
+      "avoid": ["mascot", "game-neon", "cpa20-reta-final-card"]
+    },
+    "career": {
+      "concepts": ["stairs", "growth", "opportunity", "milestone", "network"],
+      "components": ["timeline", "comparison", "metric", "cta"],
+      "avoid": ["childish-character", "casino-metaphor"]
+    },
+    "urgency": {
+      "concepts": ["countdown", "closing-window", "deadline", "last-slot"],
+      "components": ["metric", "alert", "progress", "cta"],
+      "avoid": ["constant-red-flash", "alarm-on-every-beat"]
+    },
+    "difficulty": {
+      "concepts": ["levels", "route", "obstacle", "complexity", "training"],
+      "components": ["comparison", "timeline", "checklist", "progress"],
+      "avoid": ["horror-literalism", "illegible-overlap"]
+    }
+  },
+  "discardedArtwork": ["CPA 20", "CERTIFICAÇÃO ATUAL", "RETA FINAL"]
+}
+

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="kit.css">
+</head>
+<body>
+<!-- EDITAR: data-duration do #stage e do #speaker = duração real da base_zoom_seam.mp4 (ffprobe) -->
+<div id="stage" data-composition-id="split" data-start="0" data-duration="30.0" data-fps="30" data-width="1080" data-height="1920">
+  <div id="top"><video id="speaker" src="top.mp4" muted playsinline data-start="0" data-duration="30.0" data-track-index="1"></video></div>
+  <div id="bottom"></div>
+</div>
+<script src="vendor/gsap.min.js"></script>
+<script src="kit.js"></script>
+<script>
+/* EDITAR SÓ ISTO. Uma cena por beat da fala (mesmos start/dur do split antigo do projeto).
+   layout: 'default' | 'reverse' | 'stack'  (alterne; stack p/ abertura, hero e fecho)
+   accent: '#22d3ee' cyan | '#F5A623' amber | '#34D399' verde | '#ff5c67' vermelho
+   headline: use **palavra** p/ destacar no acento
+   art.type: seal|exam|download|chat|button|refresh|target|gradcap|shield|lupa|gift|bars|
+             question|person|price0|cue|num|arms|star  (ver README p/ params)  */
+var SCENES = [
+  { start:0.00, dur:3.00, layout:'stack',   accent:'#F5A623', kick:'Olha só',    headline:'ABERTURA **AQUI**', art:{type:'star'} },
+  { start:3.00, dur:3.50, layout:'default', accent:'#22d3ee', kick:'Kicker',     headline:'BAIXE A **APOSTILA**', sub:'A mais atualizada.', art:{type:'download'} },
+  { start:6.50, dur:4.00, layout:'reverse', accent:'#F5A623', kick:'Você tem',   headline:'A **CPRO-R**', art:{type:'seal', label:'CPRO-R'} },
+  { start:10.5, dur:4.00, layout:'default', accent:'#34D399', kick:'Já foram',   headline:'+120 MIL **APROVADOS**', art:{type:'num', prefix:'+', to:120, suffix:'MIL'} },
+  { start:14.5, dur:5.00, layout:'stack',   accent:'#34D399', kick:'Bora',       headline:'SUA **CHANCE**', sub:'De ser aprovado.', art:{type:'target'} }
+];
+SplitKit.build({ duration: 30.0, scenes: SCENES });
+</script>
+</body>
+</html>
