@@ -20,6 +20,33 @@ window.FacelessKit = (function(){
   var TYPES = {
     headline: { html:ehHtml, init:ehInit },
 
+    poster: { // eb+hl (topo) + ILLO do split-kit com ANIMAÇÃO INTERNA (padrão) + anel ambiente
+      html:function(s){
+        var acc=s.acc||({ye:'#fbbf24',cy:'#22d3ee',gr:'#34d399',co:'#ff5c67'}[s.ebc]||'#22d3ee');
+        var ill='';
+        if(s.illo && window.SplitKit && SplitKit.ILLOS[s.illo]){ var uid=s.id+'ill'; s._uid=uid;
+          ill="<svg id='"+uid+"' class='fillo' width='432' height='432' viewBox='0 0 432 432'>"+SplitKit.ILLOS[s.illo].svg(acc,uid,s.illoOpts||{})+"</svg>"; }
+        return ehHtml(s)+"<div class='fring'></div><div class='fhero'>"+ill+"</div>"+(s.fsub?"<div class='fsub'>"+s.fsub+"</div>":"");
+      },
+      init:function(tl,r,s){ ehInit(tl,r,s);
+        var ha=at(s,'heroAt',s.start+.5);
+        var ring=q(r,'.fring');
+        if(ring){ G.set(ring,{opacity:0,scale:.7,xPercent:-50,rotation:0,transformOrigin:'50% 50%'});
+          tl.to(ring,{opacity:.4,scale:1,duration:.9,ease:'power2.out'},s.start+.3);
+          tl.to(ring,{rotation:360,duration:20,ease:'none',repeat:-1},s.start+.3); }           // ambiente girando (não é o ícone)
+        var h=q(r,'.fhero');
+        if(h){ G.set(h,{opacity:0,xPercent:-50,transformOrigin:'50% 50%'});
+          tl.set(h,{opacity:1},ha);   // aparece instantâneo — sem flash do estado final
+          // ANIMAÇÃO INTERNA do ícone (padrão split-kit). sig antecipado -.45 pra o reveal cair EM ha (a entrada é do próprio sig)
+          if(s.illo && window.SplitKit && SplitKit.ILLOS[s.illo]){
+            var qz=function(t){return Math.round(t*30)/30;};
+            SplitKit.ILLOS[s.illo].sig(tl, G, qz, s._uid, ha-0.45, s.illoOpts||{}); }
+          tl.to(h,{y:'-=12',duration:2.6,yoyo:true,repeat:-1,ease:'sine.inOut'},ha+1.6); }      // idle sutil (secundário)
+        if(q(r,'.hl')) tl.to(q(r,'.hl'),{y:'+=10',duration:3.6,yoyo:true,repeat:-1,ease:'sine.inOut'},s.start+.7);
+        var fs=q(r,'.fsub');
+        if(fs){ G.set(fs,{opacity:0,y:22}); tl.to(fs,{opacity:1,y:0,duration:.4,ease:'back.out(1.4)'},at(s,'subAt',ha+.5)); }
+      } },
+
     isoladas: {
       html:function(s){ var it=s.items||["CPA","CPRO-I","CPRO-R","CFP"];
         return ehHtml(s)+it.map(function(t,i){return "<div class='badge b"+(i+1)+"'><span class='bt'>"+t+"</span></div>";}).join(""); },
@@ -90,7 +117,7 @@ window.FacelessKit = (function(){
         if(q(r,'.datecard')){ G.set(q(r,'.datecard'),{opacity:0,y:22}); up(tl,q(r,'.datecard'), at(s,'dateAt',s.start+.7)); }
         if(q(r,'.live')){ G.set(q(r,'.live'),{opacity:0,y:22}); up(tl,q(r,'.live'), at(s,'liveAt',s.start+3.5)); }
         G.set(q(r,'.ctabtn'),{opacity:0,scale:.6,transformOrigin:'50% 50%'});
-        var ba=at(s,'btnAt',s.start+(s.date||s.live?8:.6)); pop(tl,q(r,'.ctabtn'),ba); tl.to(q(r,'.ctabtn'),{scale:1.05,duration:.5,yoyo:true,repeat:3,ease:'sine.inOut',transformOrigin:'50% 50%'},ba+.6); }
+        var ba=at(s,'btnAt',s.start+(s.date||s.live?8:.6)); pop(tl,q(r,'.ctabtn'),ba); tl.to(q(r,'.ctabtn'),{scale:1.06,duration:.7,yoyo:true,repeat:-1,ease:'sine.inOut',transformOrigin:'50% 50%'},ba+.6); }
     },
 
     broll: { // video declarado no template; aqui só grade + lower-third
@@ -118,6 +145,9 @@ window.FacelessKit = (function(){
     var cap=document.getElementById('capwrap');
     var tl=G.timeline({paused:true}); window.__timelines=window.__timelines||{}; window.__timelines['main']=tl;
     tl.to({},{duration:opts.duration},0);
+    // fundo vivo: zoom+pan lento durante o vídeo todo (parallax ambiente)
+    var bg0=root.querySelector('.bg');
+    if(bg0){ G.set(bg0,{transformOrigin:'50% 50%'}); tl.fromTo(bg0,{scale:1.06,x:-22,y:-10},{scale:1.13,x:22,y:10,duration:opts.duration,ease:'sine.inOut'},0); }
     // grade das janelas de b-roll
     var grade=root.querySelector('.grade');
     if(grade){ G.set(grade,{opacity:0}); }
@@ -129,9 +159,13 @@ window.FacelessKit = (function(){
       sc.innerHTML=T.html(s);
       tl.set(sc,{opacity:1},s.start); if(s.end!=null) tl.set(sc,{opacity:0},s.end);
       T.init(tl,sc,s);
-      // movimento ambiente: push-in lento (câmera) durante a cena — nunca fica congelado
+      // movimento ambiente: push-in + pan alternado (câmera viva) durante a cena — nunca congela
       var sdur=(s.end!=null?s.end:opts.duration)-s.start;
-      if(sdur>0.6 && s.type!=='broll') tl.fromTo(sc,{scale:1.0},{scale:1.0+Math.min(0.026,sdur*0.0045),duration:sdur,ease:'none',transformOrigin:'50% 45%',immediateRender:false},s.start);
+      if(sdur>0.6 && s.type!=='broll'){
+        var pz=1.0+Math.min(0.075, sdur*0.011);
+        var panx=(i%2===0)?20:-20;
+        tl.fromTo(sc,{scale:1.0,x:0},{scale:pz,x:panx,duration:sdur,ease:'sine.inOut',transformOrigin:'50% 45%',immediateRender:false},s.start);
+      }
       // lint "cena nunca vazia": herói não pode entrar > 0.9s depois do start
       var heroA = (s.type==='cta') ? (s.btnAt||(s.date||s.live?null:s.start+0.6)) : (s.heroAt||null);
       if(heroA!=null && (heroA - s.start) > 0.9) console.warn('[faceless-kit] cena '+i+' ('+s.type+'): herói entra '+(heroA-s.start).toFixed(1)+'s depois do start — vai deixar cena vazia. Traga heroAt/btnAt pra ~start+0.5 (sincronia fica na legenda/animação-chave).');

@@ -10,18 +10,21 @@
   <div id="capwrap"></div>
 </div>
 <script src="assets/cues.js"></script>
+<script src="illos-kit.js"></script>  <!-- define window.SplitKit (ILLOS animadas p/ o tipo 'poster') -->
 <script src="kit.js"></script>
 <script>
 // === edite SÓ isto: a lista de cenas (tipo + tempos + conteúdo). Tempos = do transcript. ===
+// PADRÃO recomendado p/ VSL/narrativa = tipo "poster": herói = ILLO do split-kit com ANIMAÇÃO INTERNA
+// (não SVG estático). 1 arte a cada ~3-5s (denso), heroAt na palavra falada. illo = chave em SplitKit.ILLOS:
+//   seal(label) exam download(label) chat button(label) refresh target(arrow) gradcap shield lupa gift
+//   bars(arrow) question person(ring) price0 cue num(to,prefix,suffix) arms star
+// illoOpts passa label/arrow/ring/to/prefix/suffix. acc deriva do ebc (ye/cy/gr/co) — ou passe acc:'#hex'.
 var SCENES = [
-  { type:"isoladas", start:0.0, end:3.5, ebc:"co", eb:"O ERRO COMUM",
-    hl:"CERTIFICAÇÃO<br><span class='co'>ISOLADA</span>",
-    items:["CPA","CPRO-I","CPRO-R","CFP"], heroAt:0.6 },
-  { type:"grid", start:3.5, end:6.0, ebc:"gr", eb:"ACESSO VITALÍCIO",
-    hl:"TODOS OS CURSOS<br><span class='gr'>PARA SEMPRE</span>",
-    items:["CPA","CPRO-I","CPRO-R","CFP"], futbar:"+ TODOS OS CURSOS FUTUROS", seal:"PARA SEMPRE",
-    heroAt:3.9, futAt:4.6, sealAt:5.2 },
-  { type:"broll", start:6.0, end:8.0, ltc:"gr", lt:"PRONTO PRA SEMPRE", ltAt:6.2 }
+  { type:"poster", start:0.0, end:3.5, ebc:"gr", eb:"A CERTIFICAÇÃO",
+    hl:"UM <span class='gr'>SINAL FORTE</span>", illo:"seal", illoOpts:{label:"CFP"}, heroAt:0.6 },
+  { type:"poster", start:3.5, end:6.5, ebc:"ye", eb:"JÁ SÃO",
+    hl:"APROVADOS", illo:"num", illoOpts:{to:120, prefix:"+", suffix:" MIL"}, heroAt:3.8 },
+  { type:"cta", start:6.5, end:8.0, ebc:"cy", eb:"BORA", hl:"SE <span class='cy'>INSCREVE</span>", btn:"CLICA AQUI 👇", btnAt:6.8 }
 ];
 FacelessKit.build({ duration:8.0, scenes:SCENES, cues:window.__cues });
 </script></body></html>

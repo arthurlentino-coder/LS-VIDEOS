@@ -73,3 +73,9 @@ video.clip{position:absolute;inset:0;width:1080px;height:1920px;object-fit:cover
 .cue{position:absolute;left:56px;right:56px;bottom:0;display:flex;justify-content:center;opacity:0}
 .pill{max-width:960px;background:rgba(255,255,255,.85);border-radius:22px;padding:18px 32px;box-shadow:0 14px 34px rgba(0,0,0,.4)}
 .pill span{font:800 44px/1.15 Inter,Arial,sans-serif;color:#8a97a0}.pill span.on{color:#0e2a36}
+.fhero{position:absolute;left:50%;top:580px;width:560px;height:560px;display:flex;align-items:center;justify-content:center}
+.fhero svg{width:100%;height:100%;overflow:visible;display:block}
+.fsub{position:absolute;left:70px;right:70px;top:1200px;font:600 42px/1.3 Inter,Arial,sans-serif;color:#cfe0ea}
+.fring{position:absolute;left:50%;top:560px;width:600px;height:600px;border-radius:50%;border:3px dashed rgba(120,160,180,.30);box-sizing:border-box}
+@font-face{font-family:'Black';src:url('fonts/ariblk.ttf') format('truetype');font-weight:900}
+.fillo{width:100%;height:100%;overflow:visible;display:block}
