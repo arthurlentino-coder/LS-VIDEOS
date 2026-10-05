@@ -14,13 +14,11 @@ educacional e financeiro). Qualidade acima de economia. Leia o `README.md` intei
 Se você está colando este prompt numa sessão aberta DENTRO do `VIDEOS/`, pule. Se a máquina ainda
 não tem o repo, clone primeiro e entre nele:
 ```
-git clone <URL-DO-SEU-REPO-PRIVADO> VIDEOS && cd VIDEOS
+git clone https://github.com/arthurlentino-coder/LS-VIDEOS.git VIDEOS && cd VIDEOS
 ```
-> O repo é **privado** e versiona só o PROCESSO (sem mídia). Hoje ele está **local (sem remote)** —
-> pra o clone funcionar, suba-o UMA vez a partir da máquina atual, ex.:
-> `gh repo create <nome> --private --source=. --push`  (ou crie um repo privado e
-> `git remote add origin <url> && git push -u origin master`). Depois a `<URL-DO-SEU-REPO-PRIVADO>`
-> acima é a URL desse remote.
+> O repo é **privado** e versiona o processo + os assets (b-roll, kits) — **sem a mídia bruta**
+> (`input/`). Clonar um repo privado exige estar autenticado no git da máquina nova (o jeito mais
+> fácil é instalar o **GitHub Desktop**, logar, e usar **File → Clone repository**).
 
 ## 0. Máquina nova — PRIMEIRA AÇÃO: rodar o bootstrap
 Sua primeira ação nesta sessão é rodar o doctor com `--fix` (instala sozinho o que dá) e depois
