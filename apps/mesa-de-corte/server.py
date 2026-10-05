@@ -443,6 +443,29 @@ class Handler(BaseHTTPRequestHandler):
                 self.serve_media(lote, q.get("item", [""])[0], q.get("fmt", ["normal"])[0])
             else:
                 self.serve_media_thumb(lote, q.get("item", [""])[0], q.get("fmt", ["normal"])[0])
+        elif u.path == "/api/download":
+            lote = q.get("lote", [""])[0]; item = q.get("item", [""])[0]; fmt = q.get("fmt", ["normal"])[0]
+            of = order_path(lote)
+            if not of.exists():
+                return self._send(404, {"error": "sem ordem"})
+            order = json.loads(of.read_text("utf-8-sig"))
+            if not self._can(order):
+                return self._send(403, {"error": "sem acesso"})
+            entry = next((it for it in order.get("fila", []) if it["id"] == item), None)
+            if not entry:
+                return self._send(404, {"error": "item nao encontrado"})
+            # não-admin só baixa formato APROVADO (entrega liberada)
+            if self.role != "admin":
+                ensure_fmts(entry)
+                if entry["fmts"].get(fmt) != "aprovado":
+                    return self._send(403, {"error": "formato ainda nao aprovado"})
+            p = media_path(entry, fmt)
+            if not p:
+                return self._send(404, {"error": "arquivo nao encontrado"})
+            proj = (order.get("config") or {}).get("projeto") or lote or "video"
+            suf = "" if fmt == "normal" else "_" + fmt
+            name = safe(f"{proj}_{item}{suf}") + p.suffix
+            self._stream_file(p, download_name=name)
         elif u.path == "/api/rawmedia":
             self.serve_raw(q.get("folder", [""])[0], q.get("file", [""])[0])
         else:
@@ -481,7 +504,7 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self._send(404, {"error": "thumb falhou"})
 
-    def _stream_file(self, p):
+    def _stream_file(self, p, download_name=None):
         size = p.stat().st_size
         ctype = mimetypes.guess_type(str(p))[0] or "application/octet-stream"
         rng = self.headers.get("Range")
@@ -500,6 +523,8 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(length))
         if rng:
             self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
+        if download_name:
+            self.send_header("Content-Disposition", f'attachment; filename="{download_name}"')
         self.end_headers()
         with open(p, "rb") as fh:
             fh.seek(start)

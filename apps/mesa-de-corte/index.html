@@ -217,6 +217,8 @@
   .fmtn { flex:1; font-weight:600; font-size:12.5px; }
   .fmtap { border:1px solid var(--good,#28b487); background:transparent; color:var(--good,#28b487); border-radius:6px; font-size:12px; font-weight:800; width:26px; height:24px; cursor:pointer; line-height:1; }
   .fmtap:hover { background:var(--good,#28b487); color:#fff; }
+  .fmtdl { text-decoration:none; font-size:14px; color:var(--accent); padding:0 4px; border-radius:5px; }
+  .fmtdl:hover { background:var(--accent-soft,rgba(124,92,255,.14)); }
   .histrow { display:flex; align-items:center; gap:7px; font-size:11.5px; padding:3px 0; border-top:1px solid var(--line); }
   .histrow:first-child { border-top:none; }
   .hista { font-size:9.5px; font-weight:800; text-transform:uppercase; padding:1px 6px; border-radius:4px; color:#fff; }
@@ -1358,7 +1360,8 @@
       "<div class='eds-card'><div class='eds-k'>Formatos</div><div class='eds-v'>"+(it.formatos||[]).map(function(f){
           var st=(it.fmts&&it.fmts[f])||it.status; var lbl=(typeof FMT!=="undefined"&&FMT[f])||f;
           var canAp=hasSaida&&st!=="aprovado";
-          return "<div class='fmtrow'><span class='fmtn'>"+esc(lbl)+"</span><span class='qstatus "+st+"'>"+((typeof ST!=="undefined"&&ST[st])||st)+"</span>"+(canAp?"<button class='fmtap' data-fmt=\""+esc(f)+"\" title='aprovar só este formato'>✓</button>":"")+"</div>";
+          var dl=(st==="aprovado")?"<a class='fmtdl' href='/api/download?lote="+encodeURIComponent(edLote)+"&item="+encodeURIComponent(it.id)+"&fmt="+encodeURIComponent(f)+"' download title='baixar entrega'>⬇</a>":"";
+          return "<div class='fmtrow'><span class='fmtn'>"+esc(lbl)+"</span><span class='qstatus "+st+"'>"+((typeof ST!=="undefined"&&ST[st])||st)+"</span>"+dl+(canAp?"<button class='fmtap' data-fmt=\""+esc(f)+"\" title='aprovar só este formato'>✓</button>":"")+"</div>";
         }).join("")+"</div></div>"+
       ((it.historico&&it.historico.length)?"<div class='eds-card'><div class='eds-k'>Histórico ("+it.historico.length+")</div><div class='eds-v' style='font-weight:400'>"+it.historico.slice().reverse().slice(0,8).map(function(h){
           var a0=(h.ajustes&&h.ajustes.length)?h.ajustes[0]:null; var canJ=a0&&a0.formato;
