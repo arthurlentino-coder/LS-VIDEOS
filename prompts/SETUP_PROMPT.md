@@ -10,6 +10,19 @@
 Você vai operar o processo de edição de criativos em vídeo (talking-heads 9:16 de marketing
 educacional e financeiro). Qualidade acima de economia. Leia o `README.md` inteiro antes de editar.
 
+## 0. Máquina nova — conferir o ambiente PRIMEIRO
+Antes de qualquer coisa, rode o doctor e resolva o que ele apontar (guia em
+`_scaffolds/pipeline-kit/SETUP.md`):
+```
+py _scaffolds/pipeline-kit/doctor.py
+```
+Ele confere ffmpeg/ffprobe, Node+npx+HyperFrames, a estrutura do `VIDEOS/`, YuNet, a lib de SFX,
+os **helpers do video-use** (ficam FORA do repo — `VIDEO_USE_HELPERS`) e `ELEVENLABS_API_KEY`.
+`✗` = essencial faltando. Caminhos são auto-detectados; sobrescreva com `VIDEOS_ROOT`,
+`VIDEO_USE_HELPERS`, `HF_SFX_DIR`. Rodar Python com `PYTHONUTF8=1 PYTHONIOENCODING=utf-8`.
+> O repo versiona só o PROCESSO; mídia (input/output/masters) e os helpers do video-use não vêm
+> no git — numa máquina nova, traga a mídia e instale os helpers (ver SETUP.md §3).
+
 ## 1. Ferramentas e integrações
 
 ### 1.1 Base (obrigatórias)
@@ -53,8 +66,13 @@ de `BASE_COMMIT` + `render.py.patch` + `hf_subs.py` + `hf.ps1` + `pip install -e
 | `apps/mesa-de-corte/check_cert.py` | gate: barra certificação errada no texto do motion (bypass `SKIP_CERT=1` só com motivo) |
 | `apps/mesa-de-corte/qa_lote.py` | QA técnico do lote inteiro |
 | `scripts/guard_ciladas.py` | detector das ciladas de GSAP/SVG/ffmpeg num projeto |
-| `_scaffolds/pipeline-kit/edit/` | scripts de projeto: `zoom_concat.py`, `hf/compose_hfsubs.py`, `hf/facecrop.py`, `hf/yunet_ort.py`, `hf/sfx_mix.py` |
-| `_scaffolds/pipeline-kit/audio/` | `trilha.py` (bed com moods calmo/sério/enérgico + ducking + whooshes) e `music_gen.py` (trilha musical de recap/aftermovie) |
+| `_scaffolds/pipeline-kit/build_item.sh` | **build canônico de 1 item** (da base até entregue): make_divider + reconcile_durations + **lint_item** (gate pré-render) → render dos 4 formatos → finish → **dress (áudio por copy, PADRÃO)** → set_status revisar → QA. Flags: `RECONCILE=0`, `CTA_EXT=1`, `MOOD=…`, `DRESS=0`, `SKIP_CERT=1`, `VIDEOS_ROOT` |
+| `_scaffolds/pipeline-kit/doctor.py` | checa o ambiente da máquina (binários/estrutura/assets/helpers/chave) |
+| `_scaffolds/pipeline-kit/new_project.py` | scaffolda `projects/<x>/edit` dos kits + `edl.json` stub com a cert no note |
+| `_scaffolds/pipeline-kit/edit/master.py` | **master SDR com receita AUTO** pelo ffprobe (tonemap HLG/PQ; transpose do metadado; `--rotate`/`--tonemap`/`--probe`) — usar no lugar de escrever a cadeia na mão |
+| `_scaffolds/pipeline-kit/edit/fix_transcript.py` | corrige garbles do Scribe lote-aware (CPRO-I/CPRO-R/CFP/CPA/ANBIMA → token certo) + `--rules` (datas); DRY-RUN por padrão |
+| `_scaffolds/pipeline-kit/edit/` | scripts de projeto: `zoom_concat.py`, `hf/compose_hfsubs.py`, `hf/facecrop.py`, `hf/yunet_ort.py`, `hf/sfx_mix.py`, `hf/make_divider.py` (gera subs-divider), `hf/reconcile_durations.py` (alinha durações à base), `hf/lint_item.py` (lint pré-render) |
+| `_scaffolds/pipeline-kit/audio/` | **áudio por copy é PADRÃO**: `sfx_from_cues.py` (cues→sfx.json por palavra), `trilha.py` (`pick-mood` calmo/sério/enérgico + `dress`: bed 0.40 + SFX + ducking + swell no CTA + loudnorm −14), `dress_item.py` (veste os 4 formatos; split=bed-only; `--order` lê config.audio do lote), `music_gen.py` (recap/aftermovie) |
 | `_scaffolds/split-kit/` | motion do split dirigido por `SCENES[]` |
 | `_scaffolds/faceless-shotseq/` | faceless padrão (shot-sequence) |
 | `_scaffolds/faceless-kit/` | faceless data-viz dirigido por `SCENES[]` |
@@ -119,6 +137,9 @@ VIDEOS/
   status a cada etapa (probe → transcrição → master → EDL → base → cada formato → finish → QA).
 - Entregar: `py apps/mesa-de-corte/set_status.py <lote> <item> revisar <saida.mp4>`.
   Um item por vez; o próximo só após APPROVE (combinatório pode ir em paralelo).
+- Revisão granular no app: aprovação/ajuste são **por formato e por parte** (legenda/takes/motion/
+  transição/áudio…). Ao refazer só um formato, devolva com `set_status.py <lote> <item> revisar
+  <saida> --fmt <formato>`. O evento `AJUSTE` traz `formatos=` e `partes=`; leia `item.ajustes`.
 - Pedido colado no chat (JSON "Ordem de Edição") vale igual.
 
 ## 4. Antes de cortar
