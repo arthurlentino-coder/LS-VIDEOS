@@ -199,6 +199,9 @@
   .edframe .ef-empty { position:absolute; inset:0; display:grid; place-items:center; color:var(--ink-mute); font-size:22px; }
   .edframe .ef-st { position:absolute; top:5px; left:5px; font-size:8.5px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; color:#fff; border-radius:4px; padding:2px 6px; }
   .ef-st.aprovado { background:var(--good,#28b487); } .ef-st.revisar { background:var(--accent); } .ef-st.em_edicao { background:var(--warn,#e0a800); } .ef-st.pendente { background:rgba(0,0,0,.55); }
+  .ef-stage { display:block; margin-top:4px; font-size:9.5px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; color:var(--warn,#e0a800); max-width:92px; line-height:1.15; }
+  .pmeta .etapa { display:inline-block; margin-left:6px; padding:1px 7px; border-radius:5px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:var(--warn,#e0a800); background:color-mix(in srgb,var(--warn,#e0a800) 15%,transparent); animation:etapaPulse 1.4s ease-in-out infinite; }
+  @keyframes etapaPulse { 0%,100%{opacity:1;} 50%{opacity:.55;} }
   .edframe .ef-name { padding:7px 8px; font-size:10.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .edframe .ef-approve { display:block; width:100%; border:0; border-top:1px solid var(--line); background:var(--accent-soft); color:var(--accent-ink); font-family:inherit; font-weight:700; font-size:11px; padding:6px; cursor:pointer; }
 
@@ -1250,10 +1253,10 @@
       var chip=function(cls,n,lb){return n?"<span class='pc "+cls+"'>"+n+" "+lb+"</span>":"";};
       $("#edProg").innerHTML="<div class='pbar'><i class='done' style='width:"+pctv(cnt.aprovado)+"'></i><i class='rev' style='width:"+pctv(cnt.revisar)+"'></i><i class='edit' style='width:"+pctv(cnt.em_edicao)+"'></i></div>"+
         "<div class='pcounts'>"+chip("done",cnt.aprovado,"aprovados")+chip("rev",cnt.revisar,"revisar")+chip("edit",cnt.em_edicao,"editando")+chip("pend",cnt.pendente,"pendentes")+"</div>"+
-        "<div class='pmeta'><b>"+cnt.aprovado+"</b> / "+tot+" concluídos"+(now?" · editando agora: <b>"+esc(now.id)+"</b>":(cnt.aprovado===tot&&tot?" · <b>lote completo ✓</b>":""))+"</div>";
+        "<div class='pmeta'><b>"+cnt.aprovado+"</b> / "+tot+" concluídos"+(now?" · editando agora: <b>"+esc(now.id)+"</b>"+(now.etapa?" <span class='etapa'>"+esc(now.etapa)+"</span>":""):(cnt.aprovado===tot&&tot?" · <b>lote completo ✓</b>":""))+"</div>";
       $("#edStrip").innerHTML=o.fila.map(function(i){
         var has=!!(i.previews&&i.previews.length);
-        var thumb=has?"<img src='/api/mediathumb?lote="+encodeURIComponent(edLote)+"&item="+encodeURIComponent(i.id)+"&fmt="+encodeURIComponent(i.previews[0])+"' alt='Prévia do clipe' loading='lazy'>":"<span class='ef-empty'>"+(i.status==="em_edicao"?"⏳":"·")+"</span>";
+        var thumb=has?"<img src='/api/mediathumb?lote="+encodeURIComponent(edLote)+"&item="+encodeURIComponent(i.id)+"&fmt="+encodeURIComponent(i.previews[0])+"' alt='Prévia do clipe' loading='lazy'>":"<span class='ef-empty'>"+(i.status==="em_edicao"?("⏳"+(i.etapa?"<span class='ef-stage'>"+esc(i.etapa)+"</span>":"")):"·")+"</span>";
         var ap=i.status==="revisar"?"<button class='ef-approve' data-ap=\""+esc(i.id)+"\">✓ Aprovar</button>":"";
         return "<div class='edframe"+(i.id===edSel?" sel":"")+"' data-id=\""+esc(i.id)+"\" data-has='"+(has?1:0)+"'>"+
           "<div class='ef-vid'>"+thumb+"<span class='ef-st "+i.status+"'>"+((typeof ST!=="undefined"&&ST[i.status])||i.status)+"</span></div>"+
