@@ -31,7 +31,19 @@ def main():
     ap.add_argument("--mood", default="auto")
     ap.add_argument("--only", default=None, choices=list(SUFFIX.keys()))
     ap.add_argument("--bed-vol", type=float, default=None)
+    ap.add_argument("--order", default=None, help="lote.json: lê config.audio (enabled/mood/bed)")
     a = ap.parse_args()
+
+    # config de áudio do lote (opcional) — sobrepõe mood/bed e pode DESLIGAR
+    BEDVOL = {"baixo": 0.30, "medio": 0.40, "alto": 0.52}
+    bedvol = a.bed_vol
+    if a.order and Path(a.order).exists():
+        import json as _json
+        cfg = (_json.loads(Path(a.order).read_text(encoding="utf-8-sig")).get("config") or {}).get("audio") or {}
+        if cfg.get("enabled") is False:
+            print("[audio] desligado p/ o lote (config.audio.enabled=false) — pulando dress"); return
+        if a.mood == "auto" and cfg.get("mood"): a.mood = cfg["mood"]
+        if bedvol is None and cfg.get("bed") in BEDVOL: bedvol = BEDVOL[cfg["bed"]]
 
     edit = Path(a.edit)
     cues = edit / "hf" / "faceless" / "assets" / "cues.js"
@@ -47,9 +59,9 @@ def main():
     mood = a.mood
     if mood == "auto":
         mood = trilha.pick_mood(trilha._load_cues_text(cues)); print(f"[mood auto] -> {mood}")
-    if a.bed_vol is not None:
+    if bedvol is not None:
         _orig = trilha.apply
-        def _apply(v, b, o, ev, bed_vol=a.bed_vol, cta_at=None): return _orig(v, b, o, ev, bed_vol=a.bed_vol, cta_at=cta_at)
+        def _apply(v, b, o, ev, bed_vol=bedvol, cta_at=None): return _orig(v, b, o, ev, bed_vol=bedvol, cta_at=cta_at)
         trilha.apply = _apply
 
     # 3) vestir cada formato

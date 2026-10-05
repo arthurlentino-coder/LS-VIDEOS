@@ -683,6 +683,21 @@ class Handler(BaseHTTPRequestHandler):
             f.write_text(json.dumps(o, ensure_ascii=False, indent=2), "utf-8")
             emit_event(f"AJUSTE lote={body.get('lote')} item={body.get('item')} status={hit['status']} formatos={','.join(sorted(alvos))} partes={partes_log} nota={hit['nota_ajuste'] or '(sem nota)'}")
             self._send(200, {"ok": True})
+        elif u.path == "/api/audio":
+            f = order_path(body.get("lote", ""))
+            if not f.exists():
+                return self._send(404, {"error": "sem ordem"})
+            a = body.get("audio") or {}
+            mood = a.get("mood", "auto"); bed = a.get("bed", "medio")
+            if mood not in ("auto", "calmo", "serio", "energico"):
+                return self._send(400, {"error": "mood invalido"})
+            if bed not in ("baixo", "medio", "alto"):
+                return self._send(400, {"error": "bed invalido"})
+            o = json.loads(f.read_text("utf-8-sig"))
+            o.setdefault("config", {})["audio"] = {"enabled": bool(a.get("enabled", True)), "mood": mood, "bed": bed}
+            f.write_text(json.dumps(o, ensure_ascii=False, indent=2), "utf-8")
+            emit_event(f"AUDIO lote={body.get('lote')} enabled={o['config']['audio']['enabled']} mood={mood} bed={bed}")
+            self._send(200, {"ok": True})
         else:
             self._send(404, {"error": "not found"})
 

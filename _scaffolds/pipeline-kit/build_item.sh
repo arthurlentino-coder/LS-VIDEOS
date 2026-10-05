@@ -62,7 +62,7 @@ rm -f "$HF/split_motion.mp4" "$HF/hybrid_motion.mp4" "$HF/faceless_prenorm.mp4"
 if [ "${DRESS:-1}" = "1" ]; then
   et "áudio"
   echo "### dress (audio por copy, mood=$MOOD)"
-  PYTHONIOENCODING=utf-8 py "$KIT/audio/dress_item.py" --edit "$PROJ/edit" --outbase "$OUT" --mood "$MOOD" 2>&1 | grep -iE "mood|vestido|dress_item OK"
+  PYTHONIOENCODING=utf-8 py "$KIT/audio/dress_item.py" --edit "$PROJ/edit" --outbase "$OUT" --mood "$MOOD" --order "apps/mesa-de-corte/orders/${LOTE}.json" 2>&1 | grep -iE "mood|vestido|dress_item OK|audio"
 fi
 
 PYTHONIOENCODING=utf-8 py apps/mesa-de-corte/set_status.py "$LOTE" "$ITEM" revisar "$OUT.mp4"

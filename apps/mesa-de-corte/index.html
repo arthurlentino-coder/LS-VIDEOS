@@ -143,6 +143,13 @@
   .ac-chip.edit { color:var(--warn,#e0a800); background:color-mix(in srgb,var(--warn,#e0a800) 16%,transparent); }
   .ac-chip.pend { color:var(--ink-mute); background:var(--line-2,var(--line)); }
   .ac-chip.aj { color:#dc2626; background:color-mix(in srgb,#dc2626 14%,transparent); }
+  .edapproveall { margin-top:8px; width:auto; align-self:flex-start; padding:7px 14px; font-size:13px; }
+  .edaudio { display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin:4px 0 14px; padding:10px 14px; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; font-size:12.5px; }
+  .edaudio .eda-k { font-weight:800; text-transform:uppercase; letter-spacing:.05em; font-size:11px; color:var(--ink-mute); }
+  .edaudio .eda-tog { display:flex; align-items:center; gap:6px; font-weight:600; }
+  .edaudio .eda-f { display:flex; align-items:center; gap:6px; color:var(--ink-mute); }
+  .edaudio select { font-family:inherit; font-size:12.5px; padding:3px 6px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--ink); }
+  .edaudio .eda-save { font-size:11px; color:var(--good,#28b487); font-weight:700; }
   .adcard .ac-fmts { display:flex; gap:5px; flex-wrap:wrap; }
   .adcard .ac-fmts span { font-size:10px; font-weight:700; color:var(--accent-ink); background:var(--accent-soft); border-radius:5px; padding:2px 7px; }
   .adcard .ac-idw { min-width:0; }
@@ -1089,6 +1096,7 @@
         <div class="edtitle"><h2 id="edTitle">—</h2><div class="edsub" id="edSub"></div></div>
       </div>
       <div class="edprog" id="edProg"></div>
+      <div class="edaudio" id="edAudio"></div>
       <div class="edstage">
         <div class="edplayer" id="edPlayer"><div class="edph">selecione um clipe na tira abaixo para pré-visualizar</div></div>
         <div class="edside" id="edSide"></div>
@@ -1286,7 +1294,8 @@
       var chip=function(cls,n,lb){return n?"<span class='pc "+cls+"'>"+n+" "+lb+"</span>":"";};
       $("#edProg").innerHTML="<div class='pbar'><i class='done' style='width:"+pctv(cnt.aprovado)+"'></i><i class='rev' style='width:"+pctv(cnt.revisar)+"'></i><i class='edit' style='width:"+pctv(cnt.em_edicao)+"'></i></div>"+
         "<div class='pcounts'>"+chip("done",cnt.aprovado,"aprovados")+chip("rev",cnt.revisar,"revisar")+chip("edit",cnt.em_edicao,"editando")+chip("pend",cnt.pendente,"pendentes")+"</div>"+
-        "<div class='pmeta'><b>"+cnt.aprovado+"</b> / "+tot+" concluídos"+(now?" · editando agora: <b>"+esc(now.id)+"</b>"+(now.etapa?" <span class='etapa'>"+esc(now.etapa)+"</span>":""):(cnt.aprovado===tot&&tot?" · <b>lote completo ✓</b>":""))+"</div>";
+        "<div class='pmeta'><b>"+cnt.aprovado+"</b> / "+tot+" concluídos"+(now?" · editando agora: <b>"+esc(now.id)+"</b>"+(now.etapa?" <span class='etapa'>"+esc(now.etapa)+"</span>":""):(cnt.aprovado===tot&&tot?" · <b>lote completo ✓</b>":""))+"</div>"+
+        (cnt.revisar?"<button type='button' class='btn primary edapproveall' id='edApproveAll'>✓ Aprovar os "+cnt.revisar+" em revisão</button>":"");
       $("#edStrip").innerHTML=o.fila.map(function(i){
         var has=!!(i.previews&&i.previews.length);
         var thumb=has?"<img src='/api/mediathumb?lote="+encodeURIComponent(edLote)+"&item="+encodeURIComponent(i.id)+"&fmt="+encodeURIComponent(i.previews[0])+"' alt='Prévia do clipe' loading='lazy'>":"<span class='ef-empty'>"+(i.status==="em_edicao"?("⏳"+(i.etapa?"<span class='ef-stage'>"+esc(i.etapa)+"</span>":"")):"·")+"</span>";
@@ -1309,9 +1318,35 @@
           fetch("/api/approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lote:edLote,item:b.dataset.ap})}).then(pollEditor);
         });
       });
+      var all=$("#edApproveAll"); if(all) all.addEventListener("click", function(){
+        var revs=o.fila.filter(function(i){return i.status==="revisar";}).map(function(i){return i.id;});
+        if(!revs.length) return; all.disabled=true; all.textContent="Aprovando "+revs.length+"…";
+        (function nextOne(k){ if(k>=revs.length){ pollEditor(); return; }
+          fetch("/api/approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lote:edLote,item:revs[k]})}).then(function(){ nextOne(k+1); }).catch(function(){ nextOne(k+1); });
+        })(0);
+      });
+      renderAudio(o);                                        // controles de áudio do lote (uma vez)
       if(edSel) renderEdSide(o, edSel);
       if(!cnt.em_edicao && !cnt.pendente) stopEditor();  // lote completo: para de pollar
     }).catch(function(){});
+  }
+  function renderAudio(o){
+    var box=$("#edAudio"); if(!box) return;
+    if(box.dataset.lote===edLote && box.innerHTML) return;   // não reconstruir a cada poll (não clobbar selects)
+    box.dataset.lote=edLote;
+    var a=(o.config&&o.config.audio)||{}; var en=a.enabled!==false, mood=a.mood||"auto", bed=a.bed||"medio";
+    var opt=function(v,l,cur){return "<option value='"+v+"'"+(v===cur?" selected":"")+">"+l+"</option>";};
+    box.innerHTML="<span class='eda-k'>Áudio do lote</span>"+
+      "<label class='eda-tog'><input type='checkbox' id='edAudEn'"+(en?" checked":"")+"> trilha + SFX</label>"+
+      "<label class='eda-f'>Trilha <select id='edAudMood'>"+opt("auto","auto (pela copy)",mood)+opt("calmo","calmo",mood)+opt("serio","sério",mood)+opt("energico","enérgico",mood)+"</select></label>"+
+      "<label class='eda-f'>Volume <select id='edAudBed'>"+opt("baixo","baixo",bed)+opt("medio","médio",bed)+opt("alto","alto",bed)+"</select></label>"+
+      "<span class='eda-save' id='edAudMsg'></span>";
+    var save=function(){ var payload={enabled:$("#edAudEn").checked, mood:$("#edAudMood").value, bed:$("#edAudBed").value};
+      $("#edAudMsg").textContent="salvando…";
+      fetch("/api/audio",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lote:edLote,audio:payload})})
+        .then(function(r){return r.json();}).then(function(d){ $("#edAudMsg").textContent=d&&d.ok?"salvo ✓":"erro"; if(edOrder){edOrder.config=edOrder.config||{}; edOrder.config.audio=payload;} setTimeout(function(){var m=$("#edAudMsg");if(m)m.textContent="";},1500); })
+        .catch(function(){ $("#edAudMsg").textContent="erro"; }); };
+    ["edAudEn","edAudMood","edAudBed"].forEach(function(idv){ var el=$("#"+idv); if(el) el.addEventListener("change", save); });
   }
   function renderEdSide(o, id){
     if($("#edNota") && $("#edNota").dataset.item===id) return;
