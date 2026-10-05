@@ -21,6 +21,38 @@ pronto, multi-tenant (contas + dono) e com download das entregas aprovadas.
   3. `cloudflared tunnel --url http://127.0.0.1:8756` (ou túnel nomeado com domínio fixo). O túnel cuida do TLS.
   4. Manter de pé: **nssm** (Windows) ou Agendador de Tarefas rodando o `py server.py` no boot.
 
+### Opção 1 — passo a passo (produção, domínio fixo)
+Pré: senha-mestra em `apps/mesa-de-corte/orders/_token.txt` (fora do git) e/ou contas via `useradd.py`.
+```powershell
+# 1) subir o console exposto p/ o túnel (lê orders/_token.txt)
+powershell -ExecutionPolicy Bypass -File apps\mesa-de-corte\run.ps1 -Expose
+
+# 2) instalar cloudflared
+winget install Cloudflare.cloudflared
+
+# 3a) TESTE RÁPIDO (sem conta, URL temporária):
+cloudflared tunnel --url http://127.0.0.1:8756
+
+# 3b) PRODUÇÃO (conta Cloudflare grátis + domínio): túnel nomeado
+cloudflared tunnel login
+cloudflared tunnel create mesa
+cloudflared tunnel route dns mesa mesa.SEUDOMINIO.com
+#   config em ~/.cloudflared/config.yml:
+#     tunnel: mesa
+#     credentials-file: C:\Users\<voce>\.cloudflared\<id>.json
+#     ingress:
+#       - hostname: mesa.SEUDOMINIO.com
+#         service: http://127.0.0.1:8756
+#       - service: http_status:404
+cloudflared tunnel run mesa
+```
+**Ficar de pé no boot (Windows):**
+```powershell
+cloudflared service install        # túnel como serviço
+# console como serviço: use nssm (https://nssm.cc)
+nssm install MesaDeCorte powershell "-ExecutionPolicy Bypass -File C:\Users\<voce>\Desktop\VIDEOS\apps\mesa-de-corte\run.ps1 -Expose"
+```
+
 **Opção 2 (mais robusta, mais ops): VPS separado p/ o console, render na sua máquina.**
 - Console num VPS (~US$5-10/mês). Precisa **compartilhar `orders/` e as entregas** entre VPS e a máquina de render → use **object storage** (ver abaixo) como fonte comum, ou um sync. Só vale quando o volume justificar.
 
