@@ -142,6 +142,7 @@
   .ac-chip.rev { color:var(--accent-ink); background:var(--accent-soft); }
   .ac-chip.edit { color:var(--warn,#e0a800); background:color-mix(in srgb,var(--warn,#e0a800) 16%,transparent); }
   .ac-chip.pend { color:var(--ink-mute); background:var(--line-2,var(--line)); }
+  .ac-chip.aj { color:#dc2626; background:color-mix(in srgb,#dc2626 14%,transparent); }
   .adcard .ac-fmts { display:flex; gap:5px; flex-wrap:wrap; }
   .adcard .ac-fmts span { font-size:10px; font-weight:700; color:var(--accent-ink); background:var(--accent-soft); border-radius:5px; padding:2px 7px; }
   .adcard .ac-idw { min-width:0; }
@@ -196,6 +197,7 @@
   .ajitem.ro { background:transparent; }
   .ajitem.jump { cursor:pointer; border-radius:7px; padding:5px 8px; transition:background .12s; }
   .ajitem.jump:hover { background:var(--accent-soft,rgba(124,92,255,.12)); }
+  .histrow.jump { cursor:pointer; } .histrow.jump:hover { background:var(--accent-soft,rgba(124,92,255,.12)); }
   .eds-hint { font-weight:400; font-size:10.5px; color:var(--ink-mute); text-transform:none; letter-spacing:0; }
   .ajp { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; padding:2px 7px; border-radius:5px; color:#fff; background:var(--ink-mute); white-space:nowrap; }
   .ajp.legenda{background:#2563eb;} .ajp.takes{background:#9333ea;} .ajp.motion{background:#e0a800;} .ajp.transicao{background:#0d9488;} .ajp.audio{background:#dc2626;} .ajp.enquadramento{background:#64748b;} .ajp.copy{background:#db2777;} .ajp.outro{background:#475569;}
@@ -1161,6 +1163,7 @@
       var tot=o.total||0, pctv=function(n){return tot?(n/tot*100).toFixed(1)+"%":"0%";};
       var chips=[["done",o.aprovado,"aprovados"],["rev",o.revisar,"revisar"],["edit",o.em_edicao,"editando"],["pend",o.pendente,"pendentes"]]
         .filter(function(c){return c[1];}).map(function(c){return "<span class='ac-chip "+c[0]+"'>"+c[1]+" "+c[2]+"</span>";}).join("");
+      if(o.ajustes) chips+="<span class='ac-chip aj' title='itens com ajuste pedido'>⚠ "+o.ajustes+" ajuste"+(o.ajustes!==1?"s":"")+"</span>";
       var fmts=(o.formatos||[]).map(function(f){return "<span>"+esc((typeof FMT!=="undefined"&&FMT[f])||f)+"</span>";}).join("");
       return "<div class='adcard' role='button' tabindex='0' data-lote=\""+esc(o.lote)+"\">"+
         "<div class='ac-top'><div class='ac-idw'><div class='ac-name'>"+esc(o.projeto||o.lote)+"</div>"+
@@ -1322,7 +1325,10 @@
           var canAp=hasSaida&&st!=="aprovado";
           return "<div class='fmtrow'><span class='fmtn'>"+esc(lbl)+"</span><span class='qstatus "+st+"'>"+((typeof ST!=="undefined"&&ST[st])||st)+"</span>"+(canAp?"<button class='fmtap' data-fmt=\""+esc(f)+"\" title='aprovar só este formato'>✓</button>":"")+"</div>";
         }).join("")+"</div></div>"+
-      ((it.historico&&it.historico.length)?"<div class='eds-card'><div class='eds-k'>Histórico ("+it.historico.length+")</div><div class='eds-v' style='font-weight:400'>"+it.historico.slice().reverse().slice(0,8).map(function(h){return "<div class='histrow'><span class='hista "+esc(h.acao)+"'>"+esc(h.acao==="ajuste"?"ajuste":"aprovado")+"</span><span class='histf'>"+esc(h.formato||"—")+"</span><span class='histt'>"+esc((h.ts||"").replace("T"," ").slice(5,16))+"</span>"+(h.nota?"<div class='histn'>"+esc(h.nota)+"</div>":"")+"</div>";}).join("")+"</div></div>":"")+
+      ((it.historico&&it.historico.length)?"<div class='eds-card'><div class='eds-k'>Histórico ("+it.historico.length+")</div><div class='eds-v' style='font-weight:400'>"+it.historico.slice().reverse().slice(0,8).map(function(h){
+          var a0=(h.ajustes&&h.ajustes.length)?h.ajustes[0]:null; var canJ=a0&&a0.formato;
+          return "<div class='histrow"+(canJ?" jump":"")+"'"+(canJ?" data-fmt=\""+esc(a0.formato)+"\" data-t=\""+(a0.tempo!=null?(+a0.tempo):0)+"\"":"")+"><span class='hista "+esc(h.acao)+"'>"+esc(h.acao==="ajuste"?"ajuste":"aprovado")+"</span><span class='histf'>"+esc(h.formato||"—")+"</span><span class='histt'>"+esc((h.ts||"").replace("T"," ").slice(5,16))+"</span>"+(h.nota?"<div class='histn'>"+esc(h.nota)+"</div>":"")+"</div>";
+        }).join("")+"</div></div>":"")+
       ((it.ajustes&&it.ajustes.length)
         ?"<div class='eds-card'><div class='eds-k'>Ajustes pedidos ("+it.ajustes.length+") <span class='eds-hint'>· clique p/ ir ao momento</span></div><div class='eds-v' style='font-weight:400'>"+it.ajustes.map(function(a){var j=a.formato?" jump":"";return "<div class='ajitem ro"+j+"'"+(a.formato?" data-fmt=\""+esc(a.formato)+"\" data-t=\""+(a.tempo!=null?(+a.tempo):0)+"\"":"")+"><span class='ajp "+esc(a.parte)+"'>"+esc(a.parte)+"</span><span class='ajm'>"+esc(a.formato||"—")+(a.tempo!=null?" · "+(+a.tempo).toFixed(1)+"s":"")+"</span><span class='ajn'>"+esc(a.nota||"(ajustar)")+"</span></div>";}).join("")+"</div></div>"
         :(it.nota_ajuste?"<div class='eds-card'><div class='eds-k'>Nota de ajuste</div><div class='eds-v' style='font-weight:400;font-size:13px'>"+esc(it.nota_ajuste)+"</div></div>":""))+
@@ -1337,7 +1343,7 @@
         .then(function(r){return r.json();})
         .then(function(){ fetch("/api/status?lote="+encodeURIComponent(edLote)).then(function(r){return r.json();}).then(function(fr){ renderEdSide(fr,id); }); pollEditor(); });
     }); });
-    $$("#edSide .ajitem.jump").forEach(function(row){ row.addEventListener("click", function(){
+    $$("#edSide .jump").forEach(function(row){ row.addEventListener("click", function(){
       edSel=id; edFmt=row.dataset.fmt; edSeek=parseFloat(row.dataset.t)||0; loadPlayer();
       var pl=$("#edPlayer"); if(pl&&pl.scrollIntoView) pl.scrollIntoView({behavior:"smooth",block:"center"});
     }); });

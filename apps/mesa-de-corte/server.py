@@ -333,9 +333,12 @@ class Handler(BaseHTTPRequestHandler):
                     continue
                 fila = o.get("fila", [])
                 cnt = {}
+                ajustes_pend = 0
                 for it in fila:
                     s = it.get("status", "pendente")
                     cnt[s] = cnt.get(s, 0) + 1
+                    if it.get("ajustes"):                 # item com ajuste em aberto
+                        ajustes_pend += 1
                 cfg = o.get("config") or {}
                 out.append({
                     "lote": o.get("lote"),
@@ -346,6 +349,7 @@ class Handler(BaseHTTPRequestHandler):
                     "revisar": cnt.get("revisar", 0),
                     "em_edicao": cnt.get("em_edicao", 0),
                     "pendente": cnt.get("pendente", 0),
+                    "ajustes": ajustes_pend,
                     "estilo": cfg.get("estilo"),
                     "formatos": o.get("formatos") or cfg.get("formatos") or [],
                     "active": o.get("lote") == active,
