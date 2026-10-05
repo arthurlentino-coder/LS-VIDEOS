@@ -10,6 +10,18 @@
 Você vai operar o processo de edição de criativos em vídeo (talking-heads 9:16 de marketing
 educacional e financeiro). Qualidade acima de economia. Leia o `README.md` inteiro antes de editar.
 
+## Pré-passo — clonar o repo (só se esta máquina ainda não tem o `VIDEOS/`)
+Se você está colando este prompt numa sessão aberta DENTRO do `VIDEOS/`, pule. Se a máquina ainda
+não tem o repo, clone primeiro e entre nele:
+```
+git clone <URL-DO-SEU-REPO-PRIVADO> VIDEOS && cd VIDEOS
+```
+> O repo é **privado** e versiona só o PROCESSO (sem mídia). Hoje ele está **local (sem remote)** —
+> pra o clone funcionar, suba-o UMA vez a partir da máquina atual, ex.:
+> `gh repo create <nome> --private --source=. --push`  (ou crie um repo privado e
+> `git remote add origin <url> && git push -u origin master`). Depois a `<URL-DO-SEU-REPO-PRIVADO>`
+> acima é a URL desse remote.
+
 ## 0. Máquina nova — PRIMEIRA AÇÃO: rodar o bootstrap
 Sua primeira ação nesta sessão é rodar o doctor com `--fix` (instala sozinho o que dá) e depois
 resolver só o que sobrar:
