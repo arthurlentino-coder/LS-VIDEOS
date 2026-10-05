@@ -41,3 +41,6 @@
 *.pyc
 .env
 .env.*
+
+# cache de beds sintetizados (regenerável)
+/_scaffolds/pipeline-kit/audio/_beds/

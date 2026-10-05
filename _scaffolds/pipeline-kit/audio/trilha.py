@@ -8,7 +8,7 @@ Dois modos:
       Mixa bed (vol 0.60) com ducking sidechain sob a fala + 2 whooshes nas junções,
       afade out, alimiter, e loudnorm two-pass -14. Não toca no vídeo, só no áudio.
 """
-import argparse, os, subprocess, sys, tempfile
+import argparse, json, os, subprocess, sys, tempfile
 from pathlib import Path
 
 WHOOSH = Path(os.environ.get("HF_SFX_DIR") or Path.home() / ".claude" / "skills" / "hyperframes-media" / "assets" / "sfx") / "whoosh-short.mp3"
@@ -57,8 +57,51 @@ MOODS = {
     pulse=dict(bpm=92, vol=0.42)),
 }
 
+SFX_DIR = Path(os.environ.get("HF_SFX_DIR") or Path.home() / ".claude" / "skills" / "hyperframes-media" / "assets" / "sfx")
+BED_CACHE = Path(os.environ.get("TRILHA_BED_CACHE") or (_videos / "_scaffolds" / "pipeline-kit" / "audio" / "_beds"))
+
 def run(cmd):
     subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+
+def _strip(s):
+    import unicodedata
+    return "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn").lower()
+
+# ---- mood automático pela COPY (transcrição/cues) ----
+MOOD_WORDS = {
+  "energico": r"(grana|salario|salarios|r\$|reais|mil|lucro|dinheiro|topo|agora|vem|bora|oportunidade|melhor|rico|conquist|sucesso|vaga|ganha|fatur)",
+  "serio":    r"(erro|errad|perde|perder|perca|sozinho|risco|cuidado|dificil|medo|escuro|problema|dificuldade|sem\s|antes\s+era)",
+}
+def pick_mood(text: str) -> str:
+    import re as _re
+    s = _strip(text)
+    scores = {m: len(_re.findall(rx, s)) for m, rx in MOOD_WORDS.items()}
+    best = max(scores, key=scores.get)
+    return best if scores[best] >= 2 else "calmo"
+
+def _load_cues_text(path: Path) -> str:
+    import re as _re, json as _json
+    raw = path.read_text(encoding="utf-8", errors="replace")
+    m = _re.search(r"__cues\s*=\s*(\[.*\])\s*;?\s*$", raw, _re.S)
+    body = m.group(1) if m else raw[raw.find("["):raw.rfind("]")+1]
+    try:
+        cues = _json.loads(body)
+        return " ".join(w.get("tx", "") for c in cues for w in c.get("words", []))
+    except Exception:
+        return raw
+
+def _bed_for(mood: str, dur: float) -> Path:
+    """Garante um bed do mood cobrindo dur (cacheado; passo múltiplo p/ reuso)."""
+    BED_CACHE.mkdir(parents=True, exist_ok=True)
+    need = int(dur // 30 + 1) * 30  # 30/60/90...
+    bed = BED_CACHE / f"bed_{mood}_{need}.wav"
+    if not bed.exists():
+        build_bed(bed, float(need), mood)
+    return bed
+
+def sfx_resolve(name: str) -> Path:
+    p = SFX_DIR / (name if name.endswith(".mp3") else name + ".mp3")
+    return p
 
 def chord_expr(freqs, gains):
     return "+".join(f"{g}*sin(2*PI*{f}*t)" for f, g in zip(freqs, gains))
@@ -127,26 +170,34 @@ def build_bed(out: Path, dur: float, mood: str = "calmo"):
     run(["ffmpeg","-y",*ins,"-filter_complex",";".join(fc),"-map","[bed]","-t",f"{dur}",str(out)])
     print(f"bed ({mood}) ->", out)
 
-def apply(video: Path, bed: Path, out: Path, whoosh_ts):
-    # duração do vídeo
+def apply(video: Path, bed: Path, out: Path, sfx_events, bed_vol: float = 0.40, cta_at: float = None):
+    """Mix: voz + bed (ducking sidechain, swell opcional no CTA) + SFX por copy. loudnorm -14.
+    sfx_events = lista de (t, file|path, gain)."""
     dur=float(subprocess.check_output(["ffprobe","-v","error","-show_entries","format=duration",
         "-of","default=nw=1:nk=1",str(video)]).decode().strip())
     prenorm = out.parent/(out.stem+"_prenorm.mp4")
     inputs=["-i",str(video),"-i",str(bed)]
-    wfilt=[]; wlabels=[]
-    for k,t in enumerate(whoosh_ts):
-        inputs+=["-i",str(WHOOSH)]
+    # bed com arco: base + swell suave entrando no CTA (volume expr, vírgulas escapadas)
+    if cta_at and cta_at > 3:
+        st=max(0.0, cta_at-2.5)
+        volexpr=f"volume='{bed_vol}+0.12*min(max((t-{st:.2f})/2.5\\,0)\\,1)':eval=frame"
+    else:
+        volexpr=f"volume={bed_vol}"
+    sfilt=[]; slabels=[]
+    for k,(t,f,g) in enumerate(sfx_events):
+        p = f if str(f).endswith(".mp3") or "/" in str(f) or "\\" in str(f) else sfx_resolve(str(f))
+        inputs+=["-i",str(p)]
         idx=2+k
-        wfilt.append(f"[{idx}:a]adelay={int(t*1000)}|{int(t*1000)},volume=0.26[w{k}]")
-        wlabels.append(f"[w{k}]")
+        sfilt.append(f"[{idx}:a]adelay={int(t*1000)}|{int(t*1000)},volume={g}[s{k}]")
+        slabels.append(f"[s{k}]")
     fc=[
-        f"[1:a]atrim=0:{dur},volume=0.60[bg]",
+        f"[1:a]atrim=0:{dur},{volexpr}[bg]",
         "[0:a]asplit=2[v1][v2]",
-        # fade SÓ no bed (não na voz) — senão o afade no mix final corta o fim da fala
+        # ducking do bed sob a voz; fade-out SÓ no bed (não corta o fim da fala)
         f"[bg][v2]sidechaincompress=threshold=0.06:ratio=3:attack=25:release=420,"
         f"afade=t=out:st={max(0,dur-2.6):.2f}:d=2.6[bgd]",
-        *wfilt,
-        f"[v1][bgd]{''.join(wlabels)}amix=inputs={2+len(whoosh_ts)}:normalize=0:duration=first,"
+        *sfilt,
+        f"[v1][bgd]{''.join(slabels)}amix=inputs={2+len(sfx_events)}:normalize=0:duration=first,"
         f"alimiter=limit=0.95[aout]",
     ]
     run(["ffmpeg","-y",*inputs,"-filter_complex",";".join(fc),
@@ -155,7 +206,24 @@ def apply(video: Path, bed: Path, out: Path, whoosh_ts):
     sys.path.insert(0,str(HELPERS)); import render
     render.apply_loudnorm_two_pass(prenorm, out, preview=False)
     prenorm.unlink(missing_ok=True)
-    print("trilha ->", out)
+    print("trilha+sfx ->", out)
+
+def dress(video: Path, out: Path, mood: str, sfx_json: Path = None, cues: Path = None, cta_at: float = None):
+    """Uma chamada: resolve mood (auto via cues), garante bed, lê sfx.json e aplica."""
+    if mood == "auto":
+        txt = _load_cues_text(cues) if cues and cues.exists() else ""
+        mood = pick_mood(txt); print(f"[mood auto] -> {mood}")
+    dur=float(subprocess.check_output(["ffprobe","-v","error","-show_entries","format=duration",
+        "-of","default=nw=1:nk=1",str(video)]).decode().strip())
+    bed=_bed_for(mood, dur)
+    events=[]
+    if sfx_json and Path(sfx_json).exists():
+        for e in json.loads(Path(sfx_json).read_text(encoding="utf-8")):
+            events.append((float(e["t"]), e["file"], float(e.get("gain",0.35))))
+        if cta_at is None:
+            rz=[e[0] for e in events if "riser" in str(e[1]) or "cinematic" in str(e[1])]
+            if rz: cta_at=rz[0]+5.54
+    apply(video, bed, out, events, cta_at=cta_at)
 
 if __name__=="__main__":
     ap=argparse.ArgumentParser()
@@ -163,14 +231,19 @@ if __name__=="__main__":
     b=sub.add_parser("build-bed"); b.add_argument("--out",required=True); b.add_argument("--dur",type=float,default=130)
     b.add_argument("--mood",default="calmo",choices=list(MOODS.keys()))
     ba=sub.add_parser("build-all"); ba.add_argument("--dir",required=True); ba.add_argument("--dur",type=float,default=130)
-    a=sub.add_parser("apply"); a.add_argument("--video",required=True); a.add_argument("--bed",required=True)
-    a.add_argument("--out",required=True); a.add_argument("--whoosh",default="")
+    d=sub.add_parser("dress"); d.add_argument("--video",required=True); d.add_argument("--out",required=True)
+    d.add_argument("--mood",default="auto"); d.add_argument("--sfx",default=None)
+    d.add_argument("--cues",default=None); d.add_argument("--cta-at",type=float,default=None)
+    pm=sub.add_parser("pick-mood"); pm.add_argument("--cues",required=True)
     args=ap.parse_args()
     if args.cmd=="build-bed":
         build_bed(Path(args.out),args.dur,args.mood)
     elif args.cmd=="build-all":
-        d=Path(args.dir); d.mkdir(parents=True,exist_ok=True)
-        for m in MOODS: build_bed(d/f"bed_{m}.wav",args.dur,m)
-    else:
-        ts=[float(x) for x in args.whoosh.split(",") if x.strip()]
-        apply(Path(args.video),Path(args.bed),Path(args.out),ts)
+        dd=Path(args.dir); dd.mkdir(parents=True,exist_ok=True)
+        for m in MOODS: build_bed(dd/f"bed_{m}.wav",args.dur,m)
+    elif args.cmd=="pick-mood":
+        print(pick_mood(_load_cues_text(Path(args.cues))))
+    else:  # dress
+        dress(Path(args.video),Path(args.out),args.mood,
+              Path(args.sfx) if args.sfx else None,
+              Path(args.cues) if args.cues else None, args.cta_at)
