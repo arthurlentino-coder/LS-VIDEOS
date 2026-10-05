@@ -185,6 +185,21 @@
   .ednota { width:100%; box-sizing:border-box; min-height:76px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font-family:inherit; font-size:13px; border-radius:9px; padding:9px 11px; resize:vertical; }
   .ednota-row { display:flex; gap:8px; margin-top:8px; }
   .ednota-row .btn { flex:1; }
+  /* ajuste por parte */
+  .parts { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
+  .partchip { font-size:11.5px; font-weight:600; padding:5px 10px; border-radius:999px; border:1px solid var(--line); background:var(--bg); color:var(--ink-mute); cursor:pointer; }
+  .partchip:hover { border-color:var(--accent); color:var(--ink); }
+  .partchip.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .ajref { font-size:11px; color:var(--ink-mute); margin:2px 0 6px; }
+  .ajlist { display:flex; flex-direction:column; gap:5px; margin:8px 0; }
+  .ajitem { display:flex; align-items:center; gap:7px; font-size:12px; background:var(--panel-2); border:1px solid var(--line); border-radius:7px; padding:5px 8px; }
+  .ajitem.ro { background:transparent; }
+  .ajp { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; padding:2px 7px; border-radius:5px; color:#fff; background:var(--ink-mute); white-space:nowrap; }
+  .ajp.legenda{background:#2563eb;} .ajp.takes{background:#9333ea;} .ajp.motion{background:#e0a800;} .ajp.transicao{background:#0d9488;} .ajp.audio{background:#dc2626;} .ajp.enquadramento{background:#64748b;} .ajp.copy{background:#db2777;} .ajp.outro{background:#475569;}
+  .ajm { font-size:10.5px; color:var(--ink-mute); white-space:nowrap; }
+  .ajn { flex:1; color:var(--ink); overflow:hidden; text-overflow:ellipsis; }
+  .ajx { border:none; background:transparent; color:var(--ink-mute); cursor:pointer; font-size:13px; padding:0 2px; }
+  .ajx:hover { color:var(--danger,#dc2626); }
   .edside { display:flex; flex-direction:column; gap:12px; }
   .edside .eds-card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; box-shadow:var(--shadow); }
   .edside .eds-k { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-mute); font-weight:700; margin-bottom:5px; }
@@ -1288,30 +1303,46 @@
       "<div class='eds-card'><div class='eds-k'>Clipe</div><div class='eds-v'>"+esc(it.id)+"</div></div>"+
       "<div class='eds-card'><div class='eds-k'>Status</div><div class='eds-v'>"+((typeof ST!=="undefined"&&ST[it.status])||it.status)+"</div></div>"+
       "<div class='eds-card'><div class='eds-k'>Formatos</div><div class='eds-v'>"+(it.formatos||[]).map(function(f){return esc((typeof FMT!=="undefined"&&FMT[f])||f);}).join(" · ")+"</div></div>"+
-      (it.nota_ajuste?"<div class='eds-card'><div class='eds-k'>Nota de ajuste</div><div class='eds-v' style='font-weight:400;font-size:13px'>"+esc(it.nota_ajuste)+"</div></div>":"")+
+      ((it.ajustes&&it.ajustes.length)
+        ?"<div class='eds-card'><div class='eds-k'>Ajustes pedidos ("+it.ajustes.length+")</div><div class='eds-v' style='font-weight:400'>"+it.ajustes.map(function(a){return "<div class='ajitem ro'><span class='ajp "+esc(a.parte)+"'>"+esc(a.parte)+"</span><span class='ajm'>"+esc(a.formato||"—")+(a.tempo!=null?" · "+(+a.tempo).toFixed(1)+"s":"")+"</span><span class='ajn'>"+esc(a.nota||"(ajustar)")+"</span></div>";}).join("")+"</div></div>"
+        :(it.nota_ajuste?"<div class='eds-card'><div class='eds-k'>Nota de ajuste</div><div class='eds-v' style='font-weight:400;font-size:13px'>"+esc(it.nota_ajuste)+"</div></div>":""))+
       "<div id='edActions'>"+
         (it.status==="revisar"?"<button class='btn primary' id='edApproveBig'>✓ Aprovar este clipe</button>":"")+
         (hasSaida?"<button class='btn del-btn' id='edRejectBig'>↺ Reprovar / pedir ajuste</button>":"")+
       "</div>";
     var big=$("#edApproveBig"); if(big) big.addEventListener("click", function(){ fetch("/api/approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lote:edLote,item:id})}).then(pollEditor); });
     var rej=$("#edRejectBig"); if(rej) rej.addEventListener("click", function(){
-      var player=$("#edPlayer video"), ajusteFmt=edFmt, ajusteTempo=player?player.currentTime:0;
-      if(player) player.pause();
-      // form inline (prompt() é bloqueado no webview embutido)
-      $("#edActions").innerHTML =
-        "<p class='rot-note'>Ajuste em "+esc(ajusteFmt)+" · "+ajusteTempo.toFixed(2)+" s</p>"+
-        "<textarea id='edNota' class='ednota' placeholder='O que ajustar neste clipe? (opcional — vira instrução pro editor)'></textarea>"+
-        "<div class='ednota-row'><button class='btn' id='edNotaCancel'>Cancelar</button><button class='btn primary' id='edNotaOk'>↺ Enviar ajuste</button></div>";
-      var ta=$("#edNota"); if(ta){ ta.dataset.item=id; ta.focus(); }
-      $("#edNotaCancel").addEventListener("click", function(){ $("#edActions").innerHTML=""; renderEdSide(o,id); });
-      $("#edNotaOk").addEventListener("click", function(){
-        var btn=this; btn.disabled=true; btn.textContent="Enviando…";
-        var nota=($("#edNota").value||"").trim();
-        fetch("/api/reject",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lote:edLote,item:id,nota:nota,formato:ajusteFmt,tempo:ajusteTempo})})
-          .then(function(r){return r.json().then(function(d){if(!r.ok || d.error) throw new Error(d.error||"Falha ao enviar ajuste"); return d;});})
-          .then(function(){ $("#edActions").innerHTML=""; pollEditor(); })
-          .catch(function(e){ btn.disabled=false; btn.textContent="Tentar novamente"; var msg=document.createElement("p"); msg.textContent=e.message; $("#edActions").appendChild(msg); });
-      });
+      var player=$("#edPlayer video"); if(player) player.pause();
+      var PARTES=[["legenda","Legenda"],["takes","Takes"],["motion","Motion"],["transicao","Transição"],["audio","Áudio"],["enquadramento","Enquadramento"],["copy","Copy/Texto"],["outro","Outro"]];
+      var queue=[], curParte="legenda";
+      function tc(){ var p=$("#edPlayer video"); return p?p.currentTime:0; }
+      function draw(){
+        $("#edActions").innerHTML =
+          "<p class='rot-note'>Ajuste <b>por parte</b>: escolha a parte, posicione o vídeo no momento e descreva. Dá pra enfileirar vários antes de enviar.</p>"+
+          "<div class='parts' id='edParts'>"+PARTES.map(function(p){return "<button type='button' class='partchip"+(p[0]===curParte?" on":"")+"' data-p='"+p[0]+"'>"+p[1]+"</button>";}).join("")+"</div>"+
+          "<div class='ajref' id='edAjRef'></div>"+
+          "<textarea id='edNota' class='ednota' placeholder='O que ajustar nessa parte? (ex.: legenda cobre o rosto; trocar take do hook; motion do CTA fora de sincronia; corte seco feio aos 0:07)'></textarea>"+
+          "<div class='ednota-row'><button type='button' class='btn' id='edAjAdd'>➕ adicionar à lista</button></div>"+
+          "<div class='ajlist' id='edAjList'></div>"+
+          "<div class='ednota-row'><button type='button' class='btn' id='edNotaCancel'>Cancelar</button><button type='button' class='btn primary' id='edNotaOk'"+(queue.length?"":" disabled")+">↺ Enviar "+(queue.length||"")+" ajuste"+(queue.length!==1?"s":"")+"</button></div>";
+        var ref=function(){ var r=$("#edAjRef"); if(r) r.textContent="Momento capturado: "+edFmt+" · "+tc().toFixed(2)+" s"; };
+        ref(); var pv=$("#edPlayer video"); if(pv) pv.addEventListener("timeupdate", ref);
+        $$("#edParts .partchip").forEach(function(c){ c.addEventListener("click", function(){ curParte=c.dataset.p; $$("#edParts .partchip").forEach(function(x){ x.classList.toggle("on", x===c); }); }); });
+        $("#edAjAdd").addEventListener("click", function(){ queue.push({parte:curParte, formato:edFmt, tempo:+tc().toFixed(2), nota:($("#edNota").value||"").trim()}); draw(); });
+        var list=$("#edAjList"); if(list){
+          list.innerHTML=queue.map(function(a,i){ return "<div class='ajitem'><span class='ajp "+a.parte+"'>"+a.parte+"</span><span class='ajm'>"+a.formato+" · "+a.tempo.toFixed(1)+"s</span><span class='ajn'>"+esc(a.nota||"(ajustar)")+"</span><button type='button' class='ajx' data-i='"+i+"'>✕</button></div>"; }).join("");
+          $$("#edAjList .ajx").forEach(function(b){ b.addEventListener("click", function(){ queue.splice(+b.dataset.i,1); draw(); }); });
+        }
+        $("#edNotaCancel").addEventListener("click", function(){ $("#edActions").innerHTML=""; renderEdSide(o,id); });
+        var ok=$("#edNotaOk"); if(ok) ok.addEventListener("click", function(){
+          if(!queue.length) return; var btn=this; btn.disabled=true; btn.textContent="Enviando…";
+          fetch("/api/reject",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lote:edLote,item:id,ajustes:queue})})
+            .then(function(r){return r.json().then(function(d){if(!r.ok || d.error) throw new Error(d.error||"Falha ao enviar ajuste"); return d;});})
+            .then(function(){ $("#edActions").innerHTML=""; pollEditor(); })
+            .catch(function(e){ btn.disabled=false; btn.textContent="Tentar novamente"; var msg=document.createElement("p"); msg.className="rot-note"; msg.textContent=e.message; $("#edActions").appendChild(msg); });
+        });
+      }
+      draw(); var ta=$("#edNota"); if(ta){ ta.dataset.item=id; ta.focus(); }
     });
   }
   var brollClips=[], curBrollCat="", brollQuery="";

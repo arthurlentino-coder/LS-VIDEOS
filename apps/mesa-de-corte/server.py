@@ -563,22 +563,59 @@ class Handler(BaseHTTPRequestHandler):
             if not f.exists():
                 return self._send(404, {"error": "sem ordem"})
             o = json.loads(f.read_text("utf-8-sig"))
-            nota = (body.get("nota", "") or "").strip()
             hit = next((it for it in o["fila"] if it["id"] == body.get("item")), None)
             if not hit:
                 return self._send(404, {"error": "item nao encontrado"})
-            fmt, tempo = body.get("formato"), body.get("tempo")
-            if fmt is not None and fmt not in hit.get("formatos", []):
-                return self._send(400, {"error": "formato nao pertence ao item"})
-            if tempo is not None and (type(tempo) not in (int, float) or not math.isfinite(tempo) or tempo < 0):
-                return self._send(400, {"error": "tempo invalido"})
+            PARTES = {"legenda", "takes", "motion", "transicao", "audio", "enquadramento", "copy", "outro"}
+            formatos = hit.get("formatos", [])
+
+            def _valida(fm, tp):
+                if fm is not None and fm not in formatos:
+                    return "formato nao pertence ao item"
+                if tp is not None and (type(tp) not in (int, float) or not math.isfinite(tp) or tp < 0):
+                    return "tempo invalido"
+                return None
+
+            ajustes_in = body.get("ajustes")
+            if isinstance(ajustes_in, list) and ajustes_in:   # NOVO: lista por parte
+                clean = []
+                for aj in ajustes_in:
+                    parte = (aj.get("parte") or "outro").lower()
+                    if parte not in PARTES:
+                        parte = "outro"
+                    fm, tp = aj.get("formato"), aj.get("tempo")
+                    err = _valida(fm, tp)
+                    if err:
+                        return self._send(400, {"error": err})
+                    clean.append({"parte": parte, "formato": fm, "tempo": tp,
+                                  "nota": (aj.get("nota", "") or "").strip()})
+                hit["ajustes"] = clean
+
+                def _lab(a):
+                    t = f" @{a['tempo']:.1f}s" if a["tempo"] is not None else ""
+                    fmx = f" [{a['formato']}]" if a["formato"] else ""
+                    return f"{a['parte']}{fmx}{t}: {a['nota'] or '(ajustar)'}"
+                hit["nota_ajuste"] = " · ".join(_lab(a) for a in clean)
+                hit["formato"] = clean[0]["formato"]
+                hit["tempo"] = clean[0]["tempo"]
+                partes_log = ",".join(a["parte"] for a in clean)
+            else:                                             # LEGADO: nota única
+                nota = (body.get("nota", "") or "").strip()
+                fmt, tempo = body.get("formato"), body.get("tempo")
+                err = _valida(fmt, tempo)
+                if err:
+                    return self._send(400, {"error": err})
+                hit["nota_ajuste"] = nota
+                hit["formato"] = fmt
+                hit["tempo"] = tempo
+                hit.pop("ajustes", None)
+                partes_log = "nota-livre"
+
             busy = any(it is not hit and it["status"] == "em_edicao" for it in o["fila"])
             hit["status"] = "pendente" if busy else "em_edicao"
-            hit["nota_ajuste"] = nota
-            hit["formato"] = fmt
-            hit["tempo"] = tempo
+            hit.pop("etapa", None)
             f.write_text(json.dumps(o, ensure_ascii=False, indent=2), "utf-8")
-            emit_event(f"AJUSTE lote={body.get('lote')} item={body.get('item')} status={hit['status']} formato={fmt} tempo={tempo} nota={nota or '(sem nota)'}")
+            emit_event(f"AJUSTE lote={body.get('lote')} item={body.get('item')} status={hit['status']} partes={partes_log} nota={hit['nota_ajuste'] or '(sem nota)'}")
             self._send(200, {"ok": True})
         else:
             self._send(404, {"error": "not found"})
