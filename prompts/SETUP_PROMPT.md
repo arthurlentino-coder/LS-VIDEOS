@@ -20,22 +20,39 @@ git clone https://github.com/arthurlentino-coder/LS-VIDEOS.git VIDEOS && cd VIDE
 > (`input/`). Clonar um repo privado exige estar autenticado no git da máquina nova (o jeito mais
 > fácil é instalar o **GitHub Desktop**, logar, e usar **File → Clone repository**).
 
-## 0. Máquina nova — PRIMEIRA AÇÃO: rodar o bootstrap
-Sua primeira ação nesta sessão é rodar o doctor com `--fix` (instala sozinho o que dá) e depois
-resolver só o que sobrar:
+## 0. Máquina nova — INSTALAR O AMBIENTE (suas primeiras ações, nesta ordem)
+Você (Claude) deve preparar a máquina antes de operar. Execute os passos A→C; só pare pra pedir ao
+usuário o que for impossível automatizar (marcado no fim).
+
+**A) Ferramentas base — instale o que faltar via winget** (idempotente: pula o que já existe).
+Rode cada um; se `winget` pedir UAC/confirmação e não der pra prosseguir sem o usuário, avise-o:
+```
+winget install -e --id Python.Python.3.12  --accept-source-agreements --accept-package-agreements
+winget install -e --id OpenJS.NodeJS.LTS   --accept-source-agreements --accept-package-agreements
+winget install -e --id Gyan.FFmpeg         --accept-source-agreements --accept-package-agreements
+winget install -e --id Git.Git             --accept-source-agreements --accept-package-agreements
+```
+Se algum **acabou de instalar**, o `PATH` desta sessão pode estar desatualizado — reabra o terminal
+(ou peça ao usuário pra reabrir a sessão) antes do passo B.
+
+**B) Bootstrap do resto — rode o doctor com `--fix`:**
 ```
 py _scaffolds/pipeline-kit/doctor.py --fix
 ```
-`--fix` instala sozinho: pacotes Python (opencv/onnxruntime/numpy/librosa/requests/yt-dlp), baixa o
-HyperFrames (npx), tenta ffmpeg/Node via winget e **clona+instala os helpers do video-use**
-(clone no BASE_COMMIT + `render.py.patch` + `hf_subs.py`/`hf.ps1` + `pip install -e .`). Depois
-**re-checa** tudo. `✗` = essencial faltando.
-**O que o --fix NÃO resolve (só você):** a **mídia** (`input/` — não vem no git) e a
-**`ELEVENLABS_API_KEY`**. Se `node`/`ffmpeg`/git acabaram de ser instalados, **reabra o terminal**
-(PATH) e rode o doctor de novo.
+`--fix` instala: pacotes Python (opencv/onnxruntime/numpy/librosa/requests/yt-dlp), baixa o
+HyperFrames (npx), confirma ffmpeg/Node (via winget, se ainda faltarem) e **clona+instala os helpers
+do video-use** (clone no BASE_COMMIT + `render.py.patch` + `hf_subs.py`/`hf.ps1` + `pip install -e .`).
+Depois ele **re-checa** tudo e imprime `✓/⚠/✗`.
+
+**C) Resolver o que sobrou.** O doctor lista o que falta. **Só NÃO dá pra automatizar (peça ao usuário):**
+- **mídia bruta** em `input/` (não vem no git — ele copia as gravações pra lá);
+- **`ELEVENLABS_API_KEY`** (segredo dele — definir como variável de ambiente).
+
 Caminhos auto-detectados; sobrescreva com `VIDEOS_ROOT`/`VIDEO_USE_HELPERS`/`HF_SFX_DIR`. Rodar
 Python com `PYTHONUTF8=1 PYTHONIOENCODING=utf-8`.
-> O repo versiona só o PROCESSO; mídia e helpers do video-use não vêm no git.
+> **Pré-requisitos que NÃO dá pra o prompt instalar** (são necessários p/ chegar até aqui): o próprio
+> **Claude Code** e o **repo clonado** (o jeito fácil é GitHub Desktop → login → Clone). O resto
+> acima o Claude instala sozinho.
 
 ## 1. Ferramentas e integrações
 
