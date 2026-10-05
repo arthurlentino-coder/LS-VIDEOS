@@ -822,7 +822,7 @@ if __name__ == "__main__":
     if AUTH_TOKEN:
         print("  auth: Basic ON (senha = MESA_TOKEN)")
     elif HOST != "127.0.0.1":
-        print("  ⚠ EXPOSTO sem MESA_TOKEN — defina MESA_TOKEN antes de abrir na rede/internet!")
+        print("  AVISO: EXPOSTO sem MESA_TOKEN - defina MESA_TOKEN/contas antes de abrir na rede!")
     httpd = ThreadingHTTPServer((HOST, PORT), Handler)
     if CERT and KEY:
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)

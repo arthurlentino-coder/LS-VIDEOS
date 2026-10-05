@@ -9,6 +9,7 @@
 #   powershell -ExecutionPolicy Bypass -File apps\mesa-de-corte\run.ps1 -Expose    # 0.0.0.0 (p/ o túnel)
 param([switch]$Expose, [int]$Port = 8756)
 
+$env:PYTHONIOENCODING = "utf-8"                             # evita cp1252 nos prints (Windows)
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path     # apps/mesa-de-corte
 $root = Resolve-Path (Join-Path $here "..\..")              # VIDEOS
 Set-Location $root
