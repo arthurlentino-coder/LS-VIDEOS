@@ -52,8 +52,27 @@ def fmt_saida(saida: str, fmt: str) -> str:
 VIDEO_EXT = {".mp4", ".mov", ".m4v", ".avi", ".mkv", ".webm"}
 PORT = int(os.environ.get("MESA_PORT", "8756"))
 HOST = os.environ.get("MESA_HOST", "127.0.0.1")   # 0.0.0.0 p/ expor na rede (exige MESA_TOKEN)
-AUTH_TOKEN = os.environ.get("MESA_TOKEN", "")      # se definido, exige Basic Auth (senha = token)
+AUTH_TOKEN = os.environ.get("MESA_TOKEN", "")      # se definido, exige Basic Auth (senha = token) -> admin
 CERT = os.environ.get("MESA_CERT", ""); KEY = os.environ.get("MESA_KEY", "")  # HTTPS opcional
+import hashlib
+
+def USERS_FILE():
+    return ORDERS / "_users.json"
+
+def load_users():
+    f = USERS_FILE()
+    if not f.exists():
+        return {}
+    try:
+        return (json.loads(f.read_text("utf-8")) or {}).get("users", {})
+    except Exception:
+        return {}
+
+def hash_pw(pw, salt):
+    return hashlib.pbkdf2_hmac("sha256", pw.encode("utf-8"), bytes.fromhex(salt), 120000).hex()
+
+def auth_configured():
+    return bool(AUTH_TOKEN) or bool(load_users())
 # Serializa mutações HTTP; scripts externos ainda precisam respeitar a fila.
 ORDER_LOCK = threading.Lock()
 THUMB_LOCK = threading.Lock()
@@ -274,17 +293,33 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
     def _authed(self):
-        if not AUTH_TOKEN:
+        # modo aberto (sem contas e sem token) = single-user admin, compat local
+        self.user = None; self.role = "admin"
+        if not auth_configured():
             return True
         h = self.headers.get("Authorization", "")
-        if h.startswith("Basic "):
-            try:
-                raw = base64.b64decode(h[6:]).decode("utf-8", "replace")
-                pw = raw.split(":", 1)[1] if ":" in raw else raw
-                return hmac.compare_digest(pw, AUTH_TOKEN)
-            except Exception:
-                return False
+        if not h.startswith("Basic "):
+            return False
+        try:
+            raw = base64.b64decode(h[6:]).decode("utf-8", "replace")
+            user, pw = (raw.split(":", 1) + [""])[:2] if ":" in raw else ("", raw)
+        except Exception:
+            return False
+        users = load_users()
+        u = users.get(user)
+        if u and "hash" in u and "salt" in u:
+            if hmac.compare_digest(hash_pw(pw, u["salt"]), u["hash"]):
+                self.user = user; self.role = u.get("role", "user"); return True
+            return False
+        if AUTH_TOKEN and hmac.compare_digest(pw, AUTH_TOKEN):   # token mestre = admin
+            self.user = user or "admin"; self.role = "admin"; return True
         return False
+
+    def _can(self, order):
+        """dono ou admin (ou modo aberto)."""
+        if self.role == "admin":
+            return True
+        return bool(self.user) and order.get("owner") == self.user
 
     def _need_auth(self):
         self.send_response(401)
@@ -357,6 +392,8 @@ class Handler(BaseHTTPRequestHandler):
                     o = json.loads(f.read_text("utf-8-sig"))
                 except Exception:
                     continue
+                if not self._can(o):            # multi-tenant: só os próprios (admin vê todos)
+                    continue
                 fila = o.get("fila", [])
                 cnt = {}
                 ajustes_pend = 0
@@ -385,16 +422,27 @@ class Handler(BaseHTTPRequestHandler):
             f = order_path(q.get("lote", [""])[0])
             if f.exists():
                 order = json.loads(f.read_text("utf-8-sig"))
+                if not self._can(order):
+                    return self._send(403, {"error": "sem acesso a este lote"})
                 for item in order.get("fila", []):
                     item["previews"] = [fmt for fmt in item.get("formatos", ["normal"]) if media_path(item, fmt)]
                     ensure_fmts(item)
                 self._send(200, order)
             else:
                 self._send(404, {"error": "sem ordem"})
-        elif u.path == "/api/media":
-            self.serve_media(q.get("lote", [""])[0], q.get("item", [""])[0], q.get("fmt", ["normal"])[0])
-        elif u.path == "/api/mediathumb":
-            self.serve_media_thumb(q.get("lote", [""])[0], q.get("item", [""])[0], q.get("fmt", ["normal"])[0])
+        elif u.path in ("/api/media", "/api/mediathumb"):
+            lote = q.get("lote", [""])[0]
+            of = order_path(lote)
+            if of.exists():
+                try:
+                    if not self._can(json.loads(of.read_text("utf-8-sig"))):
+                        return self._send(403, {"error": "sem acesso"})
+                except Exception:
+                    pass
+            if u.path == "/api/media":
+                self.serve_media(lote, q.get("item", [""])[0], q.get("fmt", ["normal"])[0])
+            else:
+                self.serve_media_thumb(lote, q.get("item", [""])[0], q.get("fmt", ["normal"])[0])
         elif u.path == "/api/rawmedia":
             self.serve_raw(q.get("folder", [""])[0], q.get("file", [""])[0])
         else:
@@ -483,6 +531,8 @@ class Handler(BaseHTTPRequestHandler):
                 order = build_order(body)
             except ValueError as exc:
                 return self._send(400, {"error": str(exc)})
+            if self.user:
+                order["owner"] = self.user       # multi-tenant: dono do lote
             if order["fila"]:
                 order["fila"][0]["status"] = "em_edicao"
             order_path(order["lote"]).write_text(json.dumps(order, ensure_ascii=False, indent=2), "utf-8")
@@ -595,6 +645,11 @@ class Handler(BaseHTTPRequestHandler):
             f = order_path(lote)
             if not f.exists():
                 return self._send(404, {"error": "sem ordem"})
+            try:
+                if not self._can(json.loads(f.read_text("utf-8-sig"))):
+                    return self._send(403, {"error": "sem acesso a este lote"})
+            except Exception:
+                pass
             trash = ORDERS / "_trash"
             trash.mkdir(exist_ok=True)
             ts = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -611,6 +666,8 @@ class Handler(BaseHTTPRequestHandler):
             if not f.exists():
                 return self._send(404, {"error": "sem ordem"})
             o = json.loads(f.read_text("utf-8"))
+            if not self._can(o):
+                return self._send(403, {"error": "sem acesso a este lote"})
             hit = next((it for it in o["fila"] if it["id"] == body.get("item")), None)
             if not hit:
                 return self._send(404, {"error": "item nao encontrado"})
@@ -645,6 +702,8 @@ class Handler(BaseHTTPRequestHandler):
             if not f.exists():
                 return self._send(404, {"error": "sem ordem"})
             o = json.loads(f.read_text("utf-8-sig"))
+            if not self._can(o):
+                return self._send(403, {"error": "sem acesso a este lote"})
             hit = next((it for it in o["fila"] if it["id"] == body.get("item")), None)
             if not hit:
                 return self._send(404, {"error": "item nao encontrado"})
@@ -722,6 +781,8 @@ class Handler(BaseHTTPRequestHandler):
             if bed not in ("baixo", "medio", "alto"):
                 return self._send(400, {"error": "bed invalido"})
             o = json.loads(f.read_text("utf-8-sig"))
+            if not self._can(o):
+                return self._send(403, {"error": "sem acesso a este lote"})
             o.setdefault("config", {})["audio"] = {"enabled": bool(a.get("enabled", True)), "mood": mood, "bed": bed}
             f.write_text(json.dumps(o, ensure_ascii=False, indent=2), "utf-8")
             emit_event(f"AUDIO lote={body.get('lote')} enabled={o['config']['audio']['enabled']} mood={mood} bed={bed}")
