@@ -219,6 +219,42 @@ def media_path(item, fmt):
     return p if VIDEOS.resolve() in p.parents and p.is_file() else None
 
 
+# ---- status POR FORMATO (compat com status do item) ----
+def ensure_fmts(item):
+    """Garante item['fmts'] = {formato: status}; inicializa do status do item."""
+    fmts = item.get("formatos") or ["normal"]
+    cur = item.get("fmts")
+    if not isinstance(cur, dict):
+        cur = {}
+    base = item.get("status", "pendente")
+    for f in fmts:
+        cur.setdefault(f, base)
+    # remove formatos que não pertencem mais
+    item["fmts"] = {f: cur[f] for f in fmts if f in cur}
+    return item["fmts"]
+
+def rollup_status(item):
+    """Deriva o status do item a partir dos formatos (aprovado só se todos; senão o 'pior')."""
+    vals = list((item.get("fmts") or {}).values())
+    if not vals:
+        return item.get("status", "pendente")
+    if all(v == "aprovado" for v in vals):
+        return "aprovado"
+    if any(v == "em_edicao" for v in vals):
+        return "em_edicao"
+    if any(v == "revisar" for v in vals):
+        return "revisar"
+    return "pendente"
+
+def hist_add(item, acao, formato=None, nota=None, ajustes=None):
+    h = item.setdefault("historico", [])
+    h.append({
+        "ts": datetime.datetime.now().isoformat(timespec="seconds"),
+        "acao": acao, "formato": formato,
+        "nota": nota, "ajustes": ajustes,
+    })
+
+
 class Handler(BaseHTTPRequestHandler):
     def _send(self, code, body, ctype="application/json"):
         data = body if isinstance(body, (bytes, bytearray)) else json.dumps(body, ensure_ascii=False).encode("utf-8")
@@ -321,6 +357,7 @@ class Handler(BaseHTTPRequestHandler):
                 order = json.loads(f.read_text("utf-8-sig"))
                 for item in order.get("fila", []):
                     item["previews"] = [fmt for fmt in item.get("formatos", ["normal"]) if media_path(item, fmt)]
+                    ensure_fmts(item)
                 self._send(200, order)
             else:
                 self._send(404, {"error": "sem ordem"})
@@ -545,18 +582,29 @@ class Handler(BaseHTTPRequestHandler):
             hit = next((it for it in o["fila"] if it["id"] == body.get("item")), None)
             if not hit:
                 return self._send(404, {"error": "item nao encontrado"})
-            if hit["status"] == "aprovado":
-                return self._send(200, {"ok": True})
-            if hit["status"] != "revisar":
-                return self._send(409, {"error": "item ainda nao esta em revisao"})
-            hit["status"] = "aprovado"
-            nxt = None if any(it["status"] == "em_edicao" for it in o["fila"]) else next((it for it in o["fila"] if it["status"] == "pendente"), None)
-            if nxt:
-                nxt["status"] = "em_edicao"
+            ensure_fmts(hit)
+            fmt = body.get("formato")
+            if fmt is not None and fmt not in hit["fmts"]:
+                return self._send(400, {"error": "formato nao pertence ao item"})
+            if fmt:                                   # aprova UM formato
+                hit["fmts"][fmt] = "aprovado"
+                hist_add(hit, "aprovado", formato=fmt)
+            else:                                     # aprova o item inteiro
+                for k in hit["fmts"]:
+                    hit["fmts"][k] = "aprovado"
+                hist_add(hit, "aprovado", formato="todos")
+            hit["status"] = rollup_status(hit)
+            hit.pop("etapa", None)
+            # só avança p/ o próximo quando o item TODO está aprovado
+            nxt = None
+            if hit["status"] == "aprovado" and not any(it["status"] == "em_edicao" for it in o["fila"]):
+                nxt = next((it for it in o["fila"] if it["status"] == "pendente"), None)
+                if nxt:
+                    nxt["status"] = "em_edicao"
             f.write_text(json.dumps(o, ensure_ascii=False, indent=2), "utf-8")
             done = all(it["status"] == "aprovado" for it in o["fila"])
-            emit_event(f"APPROVE lote={body.get('lote')} aprovado={body.get('item')} "
-                       + (f"proximo={nxt['id']}" if nxt else ("lote_completo" if done else "sem_proximo")))
+            emit_event(f"APPROVE lote={body.get('lote')} item={body.get('item')} formato={fmt or 'todos'} status={hit['status']} "
+                       + (f"proximo={nxt['id']}" if nxt else ("lote_completo" if done else "")))
             self._send(200, {"ok": True})
         elif u.path == "/api/reject":
             f = order_path(body.get("lote", ""))
@@ -599,6 +647,7 @@ class Handler(BaseHTTPRequestHandler):
                 hit["formato"] = clean[0]["formato"]
                 hit["tempo"] = clean[0]["tempo"]
                 partes_log = ",".join(a["parte"] for a in clean)
+                alvos = {a["formato"] for a in clean if a["formato"]}   # formatos citados
             else:                                             # LEGADO: nota única
                 nota = (body.get("nota", "") or "").strip()
                 fmt, tempo = body.get("formato"), body.get("tempo")
@@ -610,12 +659,23 @@ class Handler(BaseHTTPRequestHandler):
                 hit["tempo"] = tempo
                 hit.pop("ajustes", None)
                 partes_log = "nota-livre"
+                clean = None
+                alvos = {fmt} if fmt else set()
 
+            # marca os formatos afetados p/ refação (os não-citados = item inteiro)
+            ensure_fmts(hit)
+            if not alvos:
+                alvos = set(hit["fmts"])
             busy = any(it is not hit and it["status"] == "em_edicao" for it in o["fila"])
-            hit["status"] = "pendente" if busy else "em_edicao"
+            novo = "pendente" if busy else "em_edicao"
+            for t in alvos:
+                if t in hit["fmts"]:
+                    hit["fmts"][t] = novo
+            hit["status"] = rollup_status(hit)
             hit.pop("etapa", None)
+            hist_add(hit, "ajuste", formato=",".join(sorted(alvos)), nota=hit["nota_ajuste"], ajustes=clean)
             f.write_text(json.dumps(o, ensure_ascii=False, indent=2), "utf-8")
-            emit_event(f"AJUSTE lote={body.get('lote')} item={body.get('item')} status={hit['status']} partes={partes_log} nota={hit['nota_ajuste'] or '(sem nota)'}")
+            emit_event(f"AJUSTE lote={body.get('lote')} item={body.get('item')} status={hit['status']} formatos={','.join(sorted(alvos))} partes={partes_log} nota={hit['nota_ajuste'] or '(sem nota)'}")
             self._send(200, {"ok": True})
         else:
             self._send(404, {"error": "not found"})
