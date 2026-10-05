@@ -26,6 +26,41 @@ def run(cmd, timeout=600):
     except Exception as e:
         return 1, str(e)
 
+def install_video_use():
+    """Clona o video-use no BASE_COMMIT, aplica nossos patches e instala (-e)."""
+    kit = HERE.parent / "video-use"
+    base = (kit / "BASE_COMMIT").read_text().strip()
+    helpers_env = os.environ.get("VIDEO_USE_HELPERS")
+    if helpers_env:
+        print(f"  video-use: VIDEO_USE_HELPERS setado ({helpers_env}) — não mexo"); return
+    target = ROOT.parent / "claude" / "video use"
+    helpers = target / "helpers"
+    if (helpers / "render.py").is_file():
+        print("  video-use: já instalado"); return
+    if not have("git"):
+        print("  video-use: git ausente — instale o git e rode de novo"); return
+    print(f"  video-use: clonando em '{target}' @ {base[:10]}…")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if not (target / ".git").is_dir():
+        rc, out = run(["git", "clone", "https://github.com/browser-use/video-use.git", str(target)], timeout=900)
+        if rc != 0:
+            print("    FALHOU clone: " + out.strip().splitlines()[-1] if out.strip() else "    FALHOU clone"); return
+    for cmd, desc in [
+        (["git", "-C", str(target), "checkout", "-q", base], "checkout BASE_COMMIT"),
+        (["git", "-C", str(target), "apply", str(kit / "render.py.patch")], "aplicar render.py.patch"),
+    ]:
+        rc, out = run(cmd)
+        print(f"    {desc}: " + ("ok" if rc == 0 else "FALHOU (" + (out.strip().splitlines()[-1] if out.strip() else "") + ")"))
+    helpers.mkdir(parents=True, exist_ok=True)
+    for fn in ("hf_subs.py", "hf.ps1"):
+        try:
+            shutil.copy2(kit / fn, helpers / fn); print(f"    copiar {fn}: ok")
+        except Exception as e:
+            print(f"    copiar {fn}: FALHOU ({e})")
+    print("  video-use: pip install -e . …")
+    rc, out = run([sys.executable, "-m", "pip", "install", "-e", str(target)], timeout=900)
+    print("    " + ("ok" if rc == 0 else "FALHOU: " + (out.strip().splitlines()[-1] if out.strip() else "")))
+
 def fix(args):
     print("=== doctor --fix: instalando o que dá ===")
     # 1) pacotes Python
@@ -51,6 +86,8 @@ def fix(args):
             print("    " + ("ok (reabra o terminal p/ o PATH)" if rc == 0 else "FALHOU — instale o Node manual"))
     else:
         print("  winget ausente — instale ffmpeg e Node manualmente se faltarem")
+    # 4) helpers do video-use (clone + patch + pip -e)
+    install_video_use()
     print("--- re-checando ---\n")
 
 def check():
@@ -66,7 +103,13 @@ def check():
     # hyperframes
     if have("npx"):
         rc, out = run(["npx","--no-install","hyperframes","--version"], timeout=30)
-        (ok(f"hyperframes: {out.strip().splitlines()[-1]}") if rc==0 and out.strip() else warn("hyperframes não resolveu — rode --fix ou 'npx hyperframes --version'"))
+        hf = Path(os.environ.get("VIDEO_USE_HELPERS") or ROOT.parent/"claude"/"video use"/"helpers") / "hf.ps1"
+        if rc==0 and out.strip():
+            ok(f"hyperframes: {out.strip().splitlines()[-1]}")
+        elif hf.is_file():
+            ok("hyperframes: via hf.ps1 dos helpers (npx direto não resolve, e tudo bem)")
+        else:
+            warn("hyperframes: nem npx nem hf.ps1 — instale os helpers do video-use")
     # estrutura
     ok(f"VIDEOS root: {ROOT}")
     for d in ["input","output","projects","_scaffolds","apps/mesa-de-corte"]:

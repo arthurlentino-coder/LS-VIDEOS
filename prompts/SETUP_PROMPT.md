@@ -16,13 +16,13 @@ resolver só o que sobrar:
 ```
 py _scaffolds/pipeline-kit/doctor.py --fix
 ```
-`--fix` instala os pacotes Python (opencv/onnxruntime/numpy/librosa/requests/yt-dlp), baixa o
-HyperFrames (npx) e tenta ffmpeg/Node via winget. Ele **confere e re-checa**: ffmpeg/ffprobe,
-Node+npx+HyperFrames, pacotes Python, estrutura do `VIDEOS/`, YuNet, lib de SFX, **helpers do
-video-use** e `ELEVENLABS_API_KEY`. `✗` = essencial faltando.
-**O que o --fix NÃO resolve (faça/peça ao usuário):** a **mídia** (`input/` — não vem no git), os
-**helpers do video-use** (instalar fora do repo, SETUP.md §3) e a **`ELEVENLABS_API_KEY`**. Se
-`node`/`ffmpeg` acabaram de ser instalados, **reabra o terminal** (PATH) e rode o doctor de novo.
+`--fix` instala sozinho: pacotes Python (opencv/onnxruntime/numpy/librosa/requests/yt-dlp), baixa o
+HyperFrames (npx), tenta ffmpeg/Node via winget e **clona+instala os helpers do video-use**
+(clone no BASE_COMMIT + `render.py.patch` + `hf_subs.py`/`hf.ps1` + `pip install -e .`). Depois
+**re-checa** tudo. `✗` = essencial faltando.
+**O que o --fix NÃO resolve (só você):** a **mídia** (`input/` — não vem no git) e a
+**`ELEVENLABS_API_KEY`**. Se `node`/`ffmpeg`/git acabaram de ser instalados, **reabra o terminal**
+(PATH) e rode o doctor de novo.
 Caminhos auto-detectados; sobrescreva com `VIDEOS_ROOT`/`VIDEO_USE_HELPERS`/`HF_SFX_DIR`. Rodar
 Python com `PYTHONUTF8=1 PYTHONIOENCODING=utf-8`.
 > O repo versiona só o PROCESSO; mídia e helpers do video-use não vêm no git.
