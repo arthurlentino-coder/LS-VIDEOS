@@ -194,6 +194,9 @@
   .ajlist { display:flex; flex-direction:column; gap:5px; margin:8px 0; }
   .ajitem { display:flex; align-items:center; gap:7px; font-size:12px; background:var(--panel-2); border:1px solid var(--line); border-radius:7px; padding:5px 8px; }
   .ajitem.ro { background:transparent; }
+  .ajitem.jump { cursor:pointer; border-radius:7px; padding:5px 8px; transition:background .12s; }
+  .ajitem.jump:hover { background:var(--accent-soft,rgba(124,92,255,.12)); }
+  .eds-hint { font-weight:400; font-size:10.5px; color:var(--ink-mute); text-transform:none; letter-spacing:0; }
   .ajp { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; padding:2px 7px; border-radius:5px; color:#fff; background:var(--ink-mute); white-space:nowrap; }
   .ajp.legenda{background:#2563eb;} .ajp.takes{background:#9333ea;} .ajp.motion{background:#e0a800;} .ajp.transicao{background:#0d9488;} .ajp.audio{background:#dc2626;} .ajp.enquadramento{background:#64748b;} .ajp.copy{background:#db2777;} .ajp.outro{background:#475569;}
   .ajm { font-size:10.5px; color:var(--ink-mute); white-space:nowrap; }
@@ -1246,7 +1249,7 @@
   $("#ebCancel").addEventListener("click", function(){ setEditMode(""); showView("lista"); });
 
   /* ---- Editor / fila (filmstrip) ---- */
-  var edLote="", edTimer=null, edSel="", edFmt="normal", edOrder=null;
+  var edLote="", edTimer=null, edSel="", edFmt="normal", edOrder=null, edSeek=null;
   function loadPlayer(){
     if(!edSel){ $("#edPlayer").innerHTML="<div class='edph'>selecione um clipe na tira abaixo para pré-visualizar</div>"; return; }
     var item=edOrder&&edOrder.fila.find(function(i){return i.id===edSel;}), available=item?(item.previews||[]):[];
@@ -1257,6 +1260,7 @@
     }).join("")+"</div>";
     $("#edPlayer").innerHTML=tog+(edFmt?"<video controls playsinline preload='metadata' poster='/api/mediathumb?lote="+encodeURIComponent(edLote)+"&item="+encodeURIComponent(edSel)+"&fmt="+encodeURIComponent(edFmt)+"' src='/api/media?lote="+encodeURIComponent(edLote)+"&item="+encodeURIComponent(edSel)+"&fmt="+encodeURIComponent(edFmt)+"'></video>":"<p class='media-error'>Nenhuma versão disponível para este clipe ainda.</p>");
     var video=$("#edPlayer video"); if(video) video.addEventListener("error",function(){video.hidden=true; var msg=document.createElement('p');msg.className='media-error';msg.textContent='Não foi possível reproduzir esta versão. O arquivo pode estar indisponível ou usar um codec não suportado.';video.after(msg);});
+    if(video && edSeek!=null){ var _s=edSeek; edSeek=null; video.addEventListener("loadedmetadata", function(){ try{ video.currentTime=Math.min(_s, (video.duration||_s)); video.pause(); }catch(e){} }, {once:true}); }
     $$("#edPlayer .edfmt-b").forEach(function(b){ b.addEventListener("click", function(){ edFmt=b.dataset.fmt; loadPlayer(); }); });
   }
   function openEditor(lote){ edLote=lote; edSel=""; showView("editor"); $("#edPlayer").innerHTML="<div class='edph'>selecione um clipe na tira abaixo para pré-visualizar</div>"; $("#edSide").innerHTML=""; pollEditor(); if(edTimer) clearInterval(edTimer); edTimer=setInterval(pollEditor,3000); }
@@ -1320,7 +1324,7 @@
         }).join("")+"</div></div>"+
       ((it.historico&&it.historico.length)?"<div class='eds-card'><div class='eds-k'>Histórico ("+it.historico.length+")</div><div class='eds-v' style='font-weight:400'>"+it.historico.slice().reverse().slice(0,8).map(function(h){return "<div class='histrow'><span class='hista "+esc(h.acao)+"'>"+esc(h.acao==="ajuste"?"ajuste":"aprovado")+"</span><span class='histf'>"+esc(h.formato||"—")+"</span><span class='histt'>"+esc((h.ts||"").replace("T"," ").slice(5,16))+"</span>"+(h.nota?"<div class='histn'>"+esc(h.nota)+"</div>":"")+"</div>";}).join("")+"</div></div>":"")+
       ((it.ajustes&&it.ajustes.length)
-        ?"<div class='eds-card'><div class='eds-k'>Ajustes pedidos ("+it.ajustes.length+")</div><div class='eds-v' style='font-weight:400'>"+it.ajustes.map(function(a){return "<div class='ajitem ro'><span class='ajp "+esc(a.parte)+"'>"+esc(a.parte)+"</span><span class='ajm'>"+esc(a.formato||"—")+(a.tempo!=null?" · "+(+a.tempo).toFixed(1)+"s":"")+"</span><span class='ajn'>"+esc(a.nota||"(ajustar)")+"</span></div>";}).join("")+"</div></div>"
+        ?"<div class='eds-card'><div class='eds-k'>Ajustes pedidos ("+it.ajustes.length+") <span class='eds-hint'>· clique p/ ir ao momento</span></div><div class='eds-v' style='font-weight:400'>"+it.ajustes.map(function(a){var j=a.formato?" jump":"";return "<div class='ajitem ro"+j+"'"+(a.formato?" data-fmt=\""+esc(a.formato)+"\" data-t=\""+(a.tempo!=null?(+a.tempo):0)+"\"":"")+"><span class='ajp "+esc(a.parte)+"'>"+esc(a.parte)+"</span><span class='ajm'>"+esc(a.formato||"—")+(a.tempo!=null?" · "+(+a.tempo).toFixed(1)+"s":"")+"</span><span class='ajn'>"+esc(a.nota||"(ajustar)")+"</span></div>";}).join("")+"</div></div>"
         :(it.nota_ajuste?"<div class='eds-card'><div class='eds-k'>Nota de ajuste</div><div class='eds-v' style='font-weight:400;font-size:13px'>"+esc(it.nota_ajuste)+"</div></div>":""))+
       "<div id='edActions'>"+
         (it.status==="revisar"?"<button class='btn primary' id='edApproveBig'>✓ Aprovar este clipe</button>":"")+
@@ -1332,6 +1336,10 @@
       fetch("/api/approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lote:edLote,item:id,formato:b.dataset.fmt})})
         .then(function(r){return r.json();})
         .then(function(){ fetch("/api/status?lote="+encodeURIComponent(edLote)).then(function(r){return r.json();}).then(function(fr){ renderEdSide(fr,id); }); pollEditor(); });
+    }); });
+    $$("#edSide .ajitem.jump").forEach(function(row){ row.addEventListener("click", function(){
+      edSel=id; edFmt=row.dataset.fmt; edSeek=parseFloat(row.dataset.t)||0; loadPlayer();
+      var pl=$("#edPlayer"); if(pl&&pl.scrollIntoView) pl.scrollIntoView({behavior:"smooth",block:"center"});
     }); });
     var rej=$("#edRejectBig"); if(rej) rej.addEventListener("click", function(){
       var player=$("#edPlayer video"); if(player) player.pause();

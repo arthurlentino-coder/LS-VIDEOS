@@ -595,6 +595,8 @@ class Handler(BaseHTTPRequestHandler):
                 hist_add(hit, "aprovado", formato="todos")
             hit["status"] = rollup_status(hit)
             hit.pop("etapa", None)
+            if hit["status"] == "aprovado":
+                hit.pop("ajustes", None)   # nada pendente; o histórico guarda o registro
             # só avança p/ o próximo quando o item TODO está aprovado
             nxt = None
             if hit["status"] == "aprovado" and not any(it["status"] == "em_edicao" for it in o["fila"]):
