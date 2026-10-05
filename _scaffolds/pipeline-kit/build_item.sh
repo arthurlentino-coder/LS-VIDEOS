@@ -14,8 +14,9 @@
 #   MOOD=auto|calmo|serio|energico
 set +e
 PROJ="$1"; OUT="$2"; LOTE="$3"; ITEM="$4"; BDR="$5"
-ROOT="C:/Users/betat/Desktop/VIDEOS"; cd "$ROOT"
-KIT="$ROOT/_scaffolds/pipeline-kit"
+# Raiz do VIDEOS: $VIDEOS_ROOT, senão derivada da localização deste script (_scaffolds/pipeline-kit/..)
+KIT="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+ROOT="${VIDEOS_ROOT:-$(cd "$KIT/../.." && pwd)}"; cd "$ROOT"
 HF="$PROJ/edit/hf"; BASE="$PROJ/edit/base_zoom.mp4"
 VP9="-c:v libvpx-vp9 -pix_fmt yuva420p -b:v 0 -crf 30 -deadline good -cpu-used 4 -an"
 [ -z "$BDR" ] && BDR=$(ffprobe -v error -show_entries format=duration -of default=nk=1:nw=1 "$BASE")

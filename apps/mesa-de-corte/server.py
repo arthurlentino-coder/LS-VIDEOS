@@ -10,6 +10,8 @@ Rodar:  python server.py   ->  http://localhost:8756
 from __future__ import annotations
 
 import base64
+import hmac
+import ssl
 import datetime
 import json
 import math
@@ -48,7 +50,10 @@ def fmt_saida(saida: str, fmt: str) -> str:
         return str(p.with_name(p.stem + "_" + fmt + p.suffix))
     return saida
 VIDEO_EXT = {".mp4", ".mov", ".m4v", ".avi", ".mkv", ".webm"}
-PORT = 8756
+PORT = int(os.environ.get("MESA_PORT", "8756"))
+HOST = os.environ.get("MESA_HOST", "127.0.0.1")   # 0.0.0.0 p/ expor na rede (exige MESA_TOKEN)
+AUTH_TOKEN = os.environ.get("MESA_TOKEN", "")      # se definido, exige Basic Auth (senha = token)
+CERT = os.environ.get("MESA_CERT", ""); KEY = os.environ.get("MESA_KEY", "")  # HTTPS opcional
 # Serializa mutações HTTP; scripts externos ainda precisam respeitar a fila.
 ORDER_LOCK = threading.Lock()
 THUMB_LOCK = threading.Lock()
@@ -268,7 +273,28 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
 
+    def _authed(self):
+        if not AUTH_TOKEN:
+            return True
+        h = self.headers.get("Authorization", "")
+        if h.startswith("Basic "):
+            try:
+                raw = base64.b64decode(h[6:]).decode("utf-8", "replace")
+                pw = raw.split(":", 1)[1] if ":" in raw else raw
+                return hmac.compare_digest(pw, AUTH_TOKEN)
+            except Exception:
+                return False
+        return False
+
+    def _need_auth(self):
+        self.send_response(401)
+        self.send_header("WWW-Authenticate", 'Basic realm="Mesa de Corte"')
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
     def do_GET(self):
+        if not self._authed():
+            return self._need_auth()
         u = urllib.parse.urlparse(self.path)
         q = urllib.parse.parse_qs(u.query)
         if u.path in ("/", "/index.html"):
@@ -438,6 +464,8 @@ class Handler(BaseHTTPRequestHandler):
                 remaining -= len(chunk)
 
     def do_POST(self):
+        if not self._authed():
+            return self._need_auth()
         with ORDER_LOCK:
             self._post()
 
@@ -703,7 +731,16 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"Mesa de Corte - servidor local: http://localhost:{PORT}")
-    print(f"input/: {INPUT}")
-    ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
+    scheme = "https" if (CERT and KEY) else "http"
+    print(f"Mesa de Corte - {scheme}://{HOST}:{PORT}  (input/: {INPUT})")
+    if AUTH_TOKEN:
+        print("  auth: Basic ON (senha = MESA_TOKEN)")
+    elif HOST != "127.0.0.1":
+        print("  ⚠ EXPOSTO sem MESA_TOKEN — defina MESA_TOKEN antes de abrir na rede/internet!")
+    httpd = ThreadingHTTPServer((HOST, PORT), Handler)
+    if CERT and KEY:
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ctx.load_cert_chain(certfile=CERT, keyfile=KEY)
+        httpd.socket = ctx.wrap_socket(httpd.socket, server_side=True)
+    httpd.serve_forever()
 
