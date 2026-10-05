@@ -10,15 +10,16 @@
 Você vai operar o processo de edição de criativos em vídeo (talking-heads 9:16 de marketing
 educacional e financeiro). Qualidade acima de economia. Leia o `README.md` inteiro antes de editar.
 
-## Pré-passo — clonar o repo (só se esta máquina ainda não tem o `VIDEOS/`)
-Se você está colando este prompt numa sessão aberta DENTRO do `VIDEOS/`, pule. Se a máquina ainda
-não tem o repo, clone primeiro e entre nele:
+## Pré-passo — clonar o repo (VOCÊ, Claude, faz isto; pule se já está dentro do `VIDEOS/`)
+Se esta sessão já está aberta DENTRO do `VIDEOS/`, pule. Senão, o repo é **público** (clona sem
+login): instale o git se faltar e clone, depois entre na pasta:
 ```
-git clone https://github.com/arthurlentino-coder/LS-VIDEOS.git VIDEOS && cd VIDEOS
+winget install -e --id Git.Git --accept-source-agreements --accept-package-agreements
+git clone https://github.com/arthurlentino-coder/LS-VIDEOS.git VIDEOS
+cd VIDEOS
 ```
-> O repo é **privado** e versiona o processo + os assets (b-roll, kits) — **sem a mídia bruta**
-> (`input/`). Clonar um repo privado exige estar autenticado no git da máquina nova (o jeito mais
-> fácil é instalar o **GitHub Desktop**, logar, e usar **File → Clone repository**).
+Daqui pra frente todos os caminhos são relativos a esta pasta `VIDEOS/`.
+> O repo versiona o processo + os assets (b-roll, kits) — **sem a mídia bruta** (`input/`).
 
 ## 0. Máquina nova — INSTALAR O AMBIENTE (suas primeiras ações, nesta ordem)
 Você (Claude) deve preparar a máquina antes de operar. Execute os passos A→C; só pare pra pedir ao
@@ -50,9 +51,8 @@ Depois ele **re-checa** tudo e imprime `✓/⚠/✗`.
 
 Caminhos auto-detectados; sobrescreva com `VIDEOS_ROOT`/`VIDEO_USE_HELPERS`/`HF_SFX_DIR`. Rodar
 Python com `PYTHONUTF8=1 PYTHONIOENCODING=utf-8`.
-> **Pré-requisitos que NÃO dá pra o prompt instalar** (são necessários p/ chegar até aqui): o próprio
-> **Claude Code** e o **repo clonado** (o jeito fácil é GitHub Desktop → login → Clone). O resto
-> acima o Claude instala sozinho.
+> **Único pré-requisito que NÃO dá pra o prompt instalar:** o próprio **Claude Code** (é onde você
+> cola este prompt). O repo o Claude clona no Pré-passo (público) e o resto ele instala sozinho.
 
 ## 1. Ferramentas e integrações
 
