@@ -10,18 +10,22 @@
 Você vai operar o processo de edição de criativos em vídeo (talking-heads 9:16 de marketing
 educacional e financeiro). Qualidade acima de economia. Leia o `README.md` inteiro antes de editar.
 
-## 0. Máquina nova — conferir o ambiente PRIMEIRO
-Antes de qualquer coisa, rode o doctor e resolva o que ele apontar (guia em
-`_scaffolds/pipeline-kit/SETUP.md`):
+## 0. Máquina nova — PRIMEIRA AÇÃO: rodar o bootstrap
+Sua primeira ação nesta sessão é rodar o doctor com `--fix` (instala sozinho o que dá) e depois
+resolver só o que sobrar:
 ```
-py _scaffolds/pipeline-kit/doctor.py
+py _scaffolds/pipeline-kit/doctor.py --fix
 ```
-Ele confere ffmpeg/ffprobe, Node+npx+HyperFrames, a estrutura do `VIDEOS/`, YuNet, a lib de SFX,
-os **helpers do video-use** (ficam FORA do repo — `VIDEO_USE_HELPERS`) e `ELEVENLABS_API_KEY`.
-`✗` = essencial faltando. Caminhos são auto-detectados; sobrescreva com `VIDEOS_ROOT`,
-`VIDEO_USE_HELPERS`, `HF_SFX_DIR`. Rodar Python com `PYTHONUTF8=1 PYTHONIOENCODING=utf-8`.
-> O repo versiona só o PROCESSO; mídia (input/output/masters) e os helpers do video-use não vêm
-> no git — numa máquina nova, traga a mídia e instale os helpers (ver SETUP.md §3).
+`--fix` instala os pacotes Python (opencv/onnxruntime/numpy/librosa/requests/yt-dlp), baixa o
+HyperFrames (npx) e tenta ffmpeg/Node via winget. Ele **confere e re-checa**: ffmpeg/ffprobe,
+Node+npx+HyperFrames, pacotes Python, estrutura do `VIDEOS/`, YuNet, lib de SFX, **helpers do
+video-use** e `ELEVENLABS_API_KEY`. `✗` = essencial faltando.
+**O que o --fix NÃO resolve (faça/peça ao usuário):** a **mídia** (`input/` — não vem no git), os
+**helpers do video-use** (instalar fora do repo, SETUP.md §3) e a **`ELEVENLABS_API_KEY`**. Se
+`node`/`ffmpeg` acabaram de ser instalados, **reabra o terminal** (PATH) e rode o doctor de novo.
+Caminhos auto-detectados; sobrescreva com `VIDEOS_ROOT`/`VIDEO_USE_HELPERS`/`HF_SFX_DIR`. Rodar
+Python com `PYTHONUTF8=1 PYTHONIOENCODING=utf-8`.
+> O repo versiona só o PROCESSO; mídia e helpers do video-use não vêm no git.
 
 ## 1. Ferramentas e integrações
 

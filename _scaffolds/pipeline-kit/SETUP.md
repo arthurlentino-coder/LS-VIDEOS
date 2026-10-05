@@ -28,11 +28,15 @@ A raiz é auto-detectada (sobe até achar `input/`); force com `VIDEOS_ROOT` se 
 | `ELEVENLABS_API_KEY` | Scribe/TTS | — |
 | `MESA_PORT` | porta do console | `8756` |
 
-## 5. Conferir o ambiente
+## 5. Conferir (e instalar) o ambiente
 ```
-py _scaffolds/pipeline-kit/doctor.py
+py _scaffolds/pipeline-kit/doctor.py --fix    # instala o que dá e re-checa
+py _scaffolds/pipeline-kit/doctor.py          # só diagnostica
 ```
-`✓/⚠/✗` por item + dica. Falha (`✗`) = item essencial ausente.
+`--fix` instala pacotes Python + baixa o HyperFrames + tenta ffmpeg/Node via winget.
+Não automatiza (precisa de você): **mídia** (`input/`), **helpers do video-use** (§3) e
+**`ELEVENLABS_API_KEY`**. `✗` = item essencial ausente. (Se ffmpeg/Node acabaram de instalar,
+reabra o terminal pro PATH.)
 
 ## 6. Rodar o console
 ```

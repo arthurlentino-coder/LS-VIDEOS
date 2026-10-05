@@ -1,80 +1,100 @@
 #!/usr/bin/env python3
-"""doctor.py — confere o ambiente pra rodar o console + pipeline em QUALQUER máquina.
+"""doctor.py — confere (e opcionalmente INSTALA) o ambiente do VIDEOS em qualquer máquina.
 
-Checa binários (ffmpeg/ffprobe/node/npx), o HyperFrames, a estrutura do VIDEOS,
-os assets (YuNet, fontes, lib de SFX), os helpers do video-use e as chaves de API.
-Imprime ✓/⚠/✗ com dica do que instalar/setar. Exit != 0 se faltar algo essencial.
+  py _scaffolds/pipeline-kit/doctor.py           # só diagnostica (✓/⚠/✗)
+  py _scaffolds/pipeline-kit/doctor.py --fix      # tenta instalar o que falta e re-checa
 
-Uso:  py _scaffolds/pipeline-kit/doctor.py
-Env overrides: VIDEOS_ROOT, VIDEO_USE_HELPERS, HF_SFX_DIR, ELEVENLABS_API_KEY
+--fix instala sozinho: pacotes Python (opencv/onnxruntime/numpy/librosa/requests/yt-dlp),
+aquece o HyperFrames (npx), e tenta ffmpeg/Node via winget. NÃO automatiza (precisa de você):
+mídia (input/), helpers do video-use (fora do repo) e ELEVENLABS_API_KEY.
+Env overrides: VIDEOS_ROOT, VIDEO_USE_HELPERS, HF_SFX_DIR.
 """
-import os, shutil, subprocess, sys
+import argparse, importlib.util, os, shutil, subprocess, sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve()
-ROOT = Path(os.environ.get("VIDEOS_ROOT") or HERE.parents[2])   # _scaffolds/pipeline-kit/.. /.. = VIDEOS
+ROOT = Path(os.environ.get("VIDEOS_ROOT") or HERE.parents[2])
 HOME = Path.home()
-oks=[]; warns=[]; fails=[]
-def ok(m): oks.append(m)
-def warn(m): warns.append(m)
-def fail(m): fails.append(m)
+PYPKGS = ["opencv-python-headless", "onnxruntime", "numpy", "librosa", "requests", "yt-dlp"]
+PYMODS = {"cv2": "opencv-python-headless", "onnxruntime": "onnxruntime", "numpy": "numpy"}
 
-def have(bin_): return shutil.which(bin_)
-
-# 1) binários essenciais
-for b, hint in [("ffmpeg","instale o ffmpeg e ponha no PATH"),
-                ("ffprobe","vem com o ffmpeg"),
-                ("node","instale o Node.js LTS"),
-                ("npx","vem com o Node.js")]:
-    p = have(b)
-    (ok(f"{b}: {p}") if p else fail(f"{b} AUSENTE no PATH — {hint}"))
-
-# py launcher (Windows) / python3
-py = have("py") or have("python") or have("python3")
-ok(f"python: {py or sys.executable}")
-
-# 2) HyperFrames (via npx) — rápido, com timeout
-if have("npx"):
+def have(b): return shutil.which(b)
+def run(cmd, timeout=600):
     try:
-        r = subprocess.run(["npx","--no-install","hyperframes","--version"],
-                           capture_output=True, text=True, timeout=30)
-        if r.returncode == 0:
-            ok(f"hyperframes: {r.stdout.strip() or 'ok'}")
-        else:
-            warn("hyperframes não resolveu via 'npx --no-install' — rode 'npx hyperframes --version' uma vez p/ instalar")
-    except Exception:
-        warn("não consegui checar hyperframes (rode 'npx hyperframes --version' uma vez)")
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        return r.returncode, (r.stdout or "") + (r.stderr or "")
+    except Exception as e:
+        return 1, str(e)
 
-# 3) estrutura do VIDEOS
-ok(f"VIDEOS root: {ROOT}")
-for d in ["input","output","projects","_scaffolds","apps/mesa-de-corte"]:
-    (ok(f"dir {d}/") if (ROOT/d).is_dir() else (warn if d in ("input","output","projects") else fail)(f"dir {d}/ ausente em {ROOT}"))
-if not (ROOT/"apps/mesa-de-corte/server.py").is_file():
-    fail("apps/mesa-de-corte/server.py não encontrado (raiz errada? use VIDEOS_ROOT)")
-else:
-    ok("console: apps/mesa-de-corte/server.py")
+def fix(args):
+    print("=== doctor --fix: instalando o que dá ===")
+    # 1) pacotes Python
+    print("  pip install (pacotes Python)…")
+    rc, out = run([sys.executable, "-m", "pip", "install", "--quiet", *PYPKGS])
+    print("    " + ("ok" if rc == 0 else "FALHOU: " + out.strip().splitlines()[-1] if out.strip() else "FALHOU"))
+    # 2) HyperFrames (aquece/baixa via npx)
+    if have("npx"):
+        print("  npx hyperframes (baixando CLI)…")
+        rc, out = run(["npx", "-y", "hyperframes", "--version"], timeout=300)
+        print("    " + ("ok: " + out.strip().splitlines()[-1] if rc == 0 and out.strip() else "aviso (rode 'npx hyperframes --version' manual)"))
+    # 3) ffmpeg / node via winget (se faltarem)
+    if have("winget"):
+        if not have("ffmpeg"):
+            print("  winget install ffmpeg…")
+            rc, _ = run(["winget", "install", "-e", "--id", "Gyan.FFmpeg",
+                         "--accept-source-agreements", "--accept-package-agreements"], timeout=600)
+            print("    " + ("ok (reabra o terminal p/ o PATH)" if rc == 0 else "FALHOU — instale o ffmpeg manual"))
+        if not have("node"):
+            print("  winget install Node.js LTS…")
+            rc, _ = run(["winget", "install", "-e", "--id", "OpenJS.NodeJS.LTS",
+                         "--accept-source-agreements", "--accept-package-agreements"], timeout=600)
+            print("    " + ("ok (reabra o terminal p/ o PATH)" if rc == 0 else "FALHOU — instale o Node manual"))
+    else:
+        print("  winget ausente — instale ffmpeg e Node manualmente se faltarem")
+    print("--- re-checando ---\n")
 
-# 4) assets do pipeline
-yunet = ROOT/"_scaffolds/pipeline-kit/edit/hf/yunet.onnx"
-(ok("YuNet onnx") if yunet.is_file() else warn(f"YuNet ausente ({yunet}) — facecrop do split não roda"))
-sfx = Path(os.environ.get("HF_SFX_DIR") or HOME/".claude/skills/hyperframes-media/assets/sfx")
-(ok(f"lib de SFX: {sfx}") if (sfx/"pop.mp3").is_file() else warn(f"lib de SFX ausente ({sfx}) — defina HF_SFX_DIR; áudio por copy fica sem efeitos"))
+def check():
+    oks=[]; warns=[]; fails=[]
+    ok=oks.append; warn=warns.append; fail=fails.append
+    for b, hint in [("ffmpeg","instale o ffmpeg no PATH"),("ffprobe","vem com o ffmpeg"),
+                    ("node","instale o Node.js LTS"),("npx","vem com o Node.js")]:
+        p=have(b); (ok(f"{b}: {p}") if p else fail(f"{b} AUSENTE — {hint}"))
+    ok(f"python: {have('py') or sys.executable}")
+    # pacotes python
+    for mod, pkg in PYMODS.items():
+        (ok(f"py:{mod}") if importlib.util.find_spec(mod) else warn(f"py:{mod} ausente — pip install {pkg} (ou --fix)"))
+    # hyperframes
+    if have("npx"):
+        rc, out = run(["npx","--no-install","hyperframes","--version"], timeout=30)
+        (ok(f"hyperframes: {out.strip().splitlines()[-1]}") if rc==0 and out.strip() else warn("hyperframes não resolveu — rode --fix ou 'npx hyperframes --version'"))
+    # estrutura
+    ok(f"VIDEOS root: {ROOT}")
+    for d in ["input","output","projects","_scaffolds","apps/mesa-de-corte"]:
+        (ok(f"dir {d}/") if (ROOT/d).is_dir() else (warn if d in ("input","output","projects") else fail)(f"dir {d}/ ausente"))
+    (ok("console: server.py") if (ROOT/"apps/mesa-de-corte/server.py").is_file() else fail("server.py não achado (raiz errada? use VIDEOS_ROOT)"))
+    # assets
+    (ok("YuNet onnx") if (ROOT/"_scaffolds/pipeline-kit/edit/hf/yunet.onnx").is_file() else warn("YuNet ausente — facecrop do split não roda"))
+    sfx = Path(os.environ.get("HF_SFX_DIR") or HOME/".claude/skills/hyperframes-media/assets/sfx")
+    (ok(f"lib de SFX: {sfx}") if (sfx/"pop.mp3").is_file() else warn(f"lib de SFX ausente ({sfx}) — defina HF_SFX_DIR"))
+    helpers = Path(os.environ.get("VIDEO_USE_HELPERS") or ROOT.parent/"claude"/"video use"/"helpers")
+    (ok(f"video-use helpers: {helpers}") if (helpers/"render.py").is_file() else warn(f"helpers do video-use ausentes ({helpers}) — instale (SETUP.md §3) e/ou defina VIDEO_USE_HELPERS"))
+    (ok("ELEVENLABS_API_KEY") if os.environ.get("ELEVENLABS_API_KEY") else warn("ELEVENLABS_API_KEY não definido — transcrição indisponível"))
+    return oks, warns, fails
 
-# 5) helpers do video-use (ficam FORA do repo)
-helpers = Path(os.environ.get("VIDEO_USE_HELPERS") or ROOT.parent/"claude"/"video use"/"helpers")
-(ok(f"video-use helpers: {helpers}") if (helpers/"render.py").is_file() else warn(f"helpers do video-use ausentes ({helpers}) — defina VIDEO_USE_HELPERS; loudnorm/render podem falhar"))
-
-# 6) chaves de API (opcionais, mas necessárias p/ transcrição/TTS)
-(ok("ELEVENLABS_API_KEY definido") if os.environ.get("ELEVENLABS_API_KEY") else warn("ELEVENLABS_API_KEY não definido — Scribe/TTS indisponíveis (defina p/ transcrever)"))
-
-print("=== doctor: ambiente do VIDEOS ===")
-for m in oks:  print("  ✓", m)
-for m in warns: print("  ⚠", m)
-for m in fails: print("  ✗", m)
-print(f"--- {len(oks)} ok · {len(warns)} aviso · {len(fails)} falha ---")
-if fails:
-    print("Faltam itens essenciais — veja SETUP.md.")
-sys.exit(1 if fails else 0)
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--fix", action="store_true")
+    a = ap.parse_args()
+    if a.fix:
+        fix(a)
+    oks, warns, fails = check()
+    print("=== doctor: ambiente do VIDEOS ===")
+    for m in oks:  print("  ✓", m)
+    for m in warns: print("  ⚠", m)
+    for m in fails: print("  ✗", m)
+    print(f"--- {len(oks)} ok · {len(warns)} aviso · {len(fails)} falha ---")
+    if fails: print("Faltam itens essenciais — veja SETUP.md (ou rode com --fix).")
+    sys.exit(1 if fails else 0)
 
 if __name__ == "__main__":
-    pass
+    main()
